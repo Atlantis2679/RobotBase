@@ -1,15 +1,15 @@
-package frc.lib.fields;
+package frc.lib.logfields;
 
 import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 
-public abstract class FieldBase<T> implements Supplier<T>, LoggableInputs {
+public abstract class LogField<T> implements Supplier<T>, LoggableInputs {
     protected final Supplier<T> valueSupplier;
     protected final String key;
     protected T value;
 
-    public FieldBase(String key, Supplier<T> valueSupplier, T defaultValue) {
+    public LogField(String key, Supplier<T> valueSupplier, T defaultValue) {
         this.key = key;
         this.valueSupplier = valueSupplier;
         this.value = defaultValue;

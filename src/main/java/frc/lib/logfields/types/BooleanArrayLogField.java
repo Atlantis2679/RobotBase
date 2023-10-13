@@ -1,13 +1,13 @@
-package frc.lib.fields.types;
+package frc.lib.logfields.types;
 
 import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.LogTable;
 
-import frc.lib.fields.FieldBase;
+import frc.lib.logfields.LogField;
 
-public class RawField extends FieldBase<byte[]> {
-    public RawField(String key, Supplier<byte[]> valueSupplier, byte[] defaultValue) {
+public class BooleanArrayLogField extends LogField<boolean[]> {
+    public BooleanArrayLogField(String key, Supplier<boolean[]> valueSupplier, boolean[] defaultValue) {
         super(key, valueSupplier, defaultValue);
     }
 
@@ -19,6 +19,6 @@ public class RawField extends FieldBase<byte[]> {
 
     @Override
     public void fromLog(LogTable table) {
-        value = table.getRaw(key, value);
+        value = table.getBooleanArray(key, value);
     }
 }
