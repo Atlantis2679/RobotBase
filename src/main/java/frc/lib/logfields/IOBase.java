@@ -1,4 +1,4 @@
-package frc.lib.fields;
+package frc.lib.logfields;
 
 public abstract class IOBase {
     protected final LogFieldsTable fields;

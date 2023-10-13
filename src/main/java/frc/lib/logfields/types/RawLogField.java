@@ -1,13 +1,13 @@
-package frc.lib.fields.types;
+package frc.lib.logfields.types;
 
 import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.LogTable;
 
-import frc.lib.fields.LogField;
+import frc.lib.logfields.LogField;
 
-public class FloatArrayLogField extends LogField<float[]> {
-    public FloatArrayLogField(String key, Supplier<float[]> valueSupplier, float[] defaultValue) {
+public class RawLogField extends LogField<byte[]> {
+    public RawLogField(String key, Supplier<byte[]> valueSupplier, byte[] defaultValue) {
         super(key, valueSupplier, defaultValue);
     }
 
@@ -19,6 +19,6 @@ public class FloatArrayLogField extends LogField<float[]> {
 
     @Override
     public void fromLog(LogTable table) {
-        value = table.getFloatArray(key, value);
+        value = table.getRaw(key, value);
     }
 }

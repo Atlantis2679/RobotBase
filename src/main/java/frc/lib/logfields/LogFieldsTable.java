@@ -1,4 +1,4 @@
-package frc.lib.fields;
+package frc.lib.logfields;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,18 +13,17 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-
-import frc.lib.fields.types.BooleanArrayLogField;
-import frc.lib.fields.types.BooleanLogField;
-import frc.lib.fields.types.DoubleArrayLogField;
-import frc.lib.fields.types.DoubleLogField;
-import frc.lib.fields.types.FloatArrayLogField;
-import frc.lib.fields.types.FloatLogField;
-import frc.lib.fields.types.IntegerArrayLogField;
-import frc.lib.fields.types.IntegerLogField;
-import frc.lib.fields.types.RawLogField;
-import frc.lib.fields.types.StringArrayLogField;
-import frc.lib.fields.types.StringLogField;
+import frc.lib.logfields.types.BooleanArrayLogField;
+import frc.lib.logfields.types.BooleanLogField;
+import frc.lib.logfields.types.DoubleArrayLogField;
+import frc.lib.logfields.types.DoubleLogField;
+import frc.lib.logfields.types.FloatArrayLogField;
+import frc.lib.logfields.types.FloatLogField;
+import frc.lib.logfields.types.IntegerArrayLogField;
+import frc.lib.logfields.types.IntegerLogField;
+import frc.lib.logfields.types.RawLogField;
+import frc.lib.logfields.types.StringArrayLogField;
+import frc.lib.logfields.types.StringLogField;
 
 public class LogFieldsTable implements LoggableInputs {
     private static ArrayList<LogFieldsTable> createdTables = new ArrayList<>();

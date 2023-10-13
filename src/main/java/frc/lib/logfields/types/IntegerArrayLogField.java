@@ -1,10 +1,10 @@
-package frc.lib.fields.types;
+package frc.lib.logfields.types;
 
 import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.LogTable;
 
-import frc.lib.fields.LogField;
+import frc.lib.logfields.LogField;
 
 public class IntegerArrayLogField extends LogField<long[]> {
     public IntegerArrayLogField(String key, Supplier<long[]> valueSupplier, long[] defaultValue) {

@@ -1,4 +1,4 @@
-package frc.lib.fields;
+package frc.lib.logfields;
 
 import java.util.function.Supplier;
 
