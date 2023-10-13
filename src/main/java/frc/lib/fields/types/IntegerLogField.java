@@ -4,10 +4,10 @@ import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.LogTable;
 
-import frc.lib.fields.FieldBase;
+import frc.lib.fields.LogField;
 
-public class RawField extends FieldBase<byte[]> {
-    public RawField(String key, Supplier<byte[]> valueSupplier, byte[] defaultValue) {
+public class IntegerLogField extends LogField<Long> {    
+    public IntegerLogField(String key, Supplier<Long> valueSupplier, long defaultValue) {
         super(key, valueSupplier, defaultValue);
     }
 
@@ -19,6 +19,6 @@ public class RawField extends FieldBase<byte[]> {
 
     @Override
     public void fromLog(LogTable table) {
-        value = table.getRaw(key, value);
+        value = table.getInteger(key, value);
     }
 }

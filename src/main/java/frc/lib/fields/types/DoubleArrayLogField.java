@@ -4,10 +4,10 @@ import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.LogTable;
 
-import frc.lib.fields.FieldBase;
+import frc.lib.fields.LogField;
 
-public class DoubleField extends FieldBase<Double> {
-    public DoubleField(String key, Supplier<Double> valueSupplier, double defaultValue) {
+public class DoubleArrayLogField extends LogField<double[]> {
+    public DoubleArrayLogField(String key, Supplier<double[]> valueSupplier, double[] defaultValue) {
         super(key, valueSupplier, defaultValue);
     }
 
@@ -19,6 +19,6 @@ public class DoubleField extends FieldBase<Double> {
 
     @Override
     public void fromLog(LogTable table) {
-        value = table.getDouble(key, value);
+        value = table.getDoubleArray(key, value);
     }
 }

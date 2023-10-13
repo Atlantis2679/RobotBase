@@ -1,18 +1,18 @@
 package frc.lib.fields;
 
 public abstract class IOBase {
-    protected final FieldsTable fields;
+    protected final LogFieldsTable fields;
 
-    protected IOBase(FieldsTable fieldsTable) {
+    protected IOBase(LogFieldsTable fieldsTable) {
         fields = fieldsTable;
         fieldsTable.setPeriodicBeforeFields(this::periodicBeforeFields);
     }
 
     protected IOBase(String name) {
-        fields = new FieldsTable(name);
+        fields = new LogFieldsTable(name);
     }
 
-    public FieldsTable getFieldsTable() {
+    public LogFieldsTable getFieldsTable() {
         return fields;
     }
 

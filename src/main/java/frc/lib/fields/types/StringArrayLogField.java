@@ -4,10 +4,10 @@ import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.LogTable;
 
-import frc.lib.fields.FieldBase;
+import frc.lib.fields.LogField;
 
-public class BooleanField extends FieldBase<Boolean> {
-    public BooleanField(String key, Supplier<Boolean> valueSupplier, boolean defaultValue) {
+public class StringArrayLogField extends LogField<String[]> {
+    public StringArrayLogField(String key, Supplier<String[]> valueSupplier, String[] defaultValue) {
         super(key, valueSupplier, defaultValue);
     }
 
@@ -19,6 +19,6 @@ public class BooleanField extends FieldBase<Boolean> {
 
     @Override
     public void fromLog(LogTable table) {
-        value = table.getBoolean(key, value);
+        value = table.getStringArray(key, value);
     }
 }

@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LogTable;
@@ -20,15 +18,11 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.lib.fields.LogFieldsTable;
 
 public class Robot extends LoggedRobot {
     private Command autonomousCommand;
     private RobotContainer robotContainer;
-    private static List<Runnable> periodics = new ArrayList<>();
-
-    public static void registerPeriodic(Runnable runnable) {
-        periodics.add(runnable);
-    }
 
     private String getLogPath() {
         if (isReal()) {
@@ -86,9 +80,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotPeriodic() {
-        for (Runnable periodic : periodics) {
-            periodic.run();
-        }
+        LogFieldsTable.updateAll();
         CommandScheduler.getInstance().run();
     }
 

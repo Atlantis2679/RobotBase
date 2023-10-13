@@ -4,10 +4,10 @@ import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.LogTable;
 
-import frc.lib.fields.FieldBase;
+import frc.lib.fields.LogField;
 
-public class FloatField extends FieldBase<Float> {
-    public FloatField(String key, Supplier<Float> valueSupplier, float defaultValue) {
+public class StringLogField extends LogField<String> {    
+    public StringLogField(String key, Supplier<String> valueSupplier, String defaultValue) {
         super(key, valueSupplier, defaultValue);
     }
 
@@ -19,6 +19,6 @@ public class FloatField extends FieldBase<Float> {
 
     @Override
     public void fromLog(LogTable table) {
-        value = table.getFloat(key, value);
+        value = table.getString(key, value);
     }
 }
