@@ -35,7 +35,7 @@ public class FieldsTable implements LoggableInputs {
 
     public FieldsTable(String name) {
         Robot.registerPeriodic(() -> {
-            if (periodicBeforeFields != null) {
+            if (periodicBeforeFields != null && !Logger.getInstance().hasReplaySource()) {
                 periodicBeforeFields.run();
             }
             Logger.getInstance().processInputs(name, this);
