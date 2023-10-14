@@ -16,6 +16,6 @@ public abstract class IOBase {
         return fields;
     }
 
-    public void periodicBeforeFields() {
+    protected void periodicBeforeFields() {
     }
 }
