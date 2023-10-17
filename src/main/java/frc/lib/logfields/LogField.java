@@ -15,13 +15,11 @@ public class LogField<T> implements Supplier<T>, LoggableInputs {
 
     public LogField(
             Supplier<T> valueSupplier,
-            T defaultValue,
             Function<LogTable, T> getFromLog,
             BiConsumer<LogTable, T> putInLog) {
         this.valueSupplier = valueSupplier;
         this.getFromLog = getFromLog;
         this.putInLog = putInLog;
-        this.value = defaultValue;
     }
 
     @Override
