@@ -1,5 +1,6 @@
 package frc.robot;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,16 +29,21 @@ public class Robot extends LoggedRobot {
         if (isReal()) {
             try {
                 // prefer a mounted USB drive if one is accessible
-                Path usbDir = Paths.get("/u").toRealPath();
-                if (Files.isWritable(usbDir)) {
-                    return usbDir.toString();
+                Path usbDirPath = Paths.get("/u").toRealPath();
+                if (Files.isWritable(usbDirPath)) {
+                    return usbDirPath.toString();
                 }
             } catch (IOException ex) {
                 // ignored
             }
         }
-        String path = Filesystem.getOperatingDirectory().getAbsolutePath();
-        return isReal() ? path : path + "\\logs";
+
+        File directory = Filesystem.getOperatingDirectory();
+        if (isSimulation()) {
+            directory = new File(directory, "simlogs");
+            directory.mkdir();
+        }
+        return directory.getAbsolutePath();
     }
 
     private void initializeAdvantageKit() {
