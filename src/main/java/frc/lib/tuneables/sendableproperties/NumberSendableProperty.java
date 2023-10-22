@@ -1,6 +1,7 @@
 package frc.lib.tuneables.sendableproperties;
 
 import java.util.function.Consumer;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -13,7 +14,7 @@ public class NumberSendableProperty implements SendableProperty {
 
     public NumberSendableProperty(
             String key,
-            Supplier<Double> getter,
+            DoubleSupplier getter,
             Consumer<Double> setter,
             LogFieldsTable fieldsTable,
             SendableBuilder sendableBuilder) {
@@ -28,7 +29,7 @@ public class NumberSendableProperty implements SendableProperty {
         sendableBuilder.addDoubleProperty(
                 key,
                 () -> {
-                    double outputValue = getter.get();
+                    double outputValue = getter.getAsDouble();
                     fieldsTable.recordOutput(key, outputValue);
                     return outputValue;
                 },

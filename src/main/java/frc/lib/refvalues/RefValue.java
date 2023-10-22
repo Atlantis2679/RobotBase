@@ -1,4 +1,4 @@
-package frc.lib;
+package frc.lib.refvalues;
 
 public class RefValue<T> {
     public T value;
