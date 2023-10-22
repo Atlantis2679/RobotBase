@@ -1,5 +1,6 @@
 package frc.lib.tuneables.sendableproperties;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -13,7 +14,7 @@ public class BooleanSendableProperty implements SendableProperty {
 
     public BooleanSendableProperty(
             String key,
-            Supplier<Boolean> getter,
+            BooleanSupplier getter,
             Consumer<Boolean> setter,
             LogFieldsTable fieldsTable,
             SendableBuilder sendableBuilder) {
@@ -28,7 +29,7 @@ public class BooleanSendableProperty implements SendableProperty {
         sendableBuilder.addBooleanProperty(
                 key,
                 () -> {
-                    boolean outputValue = getter.get();
+                    boolean outputValue = getter.getAsBoolean();
                     fieldsTable.recordOutput(key, outputValue);
                     return outputValue;
                 },

@@ -2,6 +2,9 @@ package frc.lib.logfields;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.LogTable;
@@ -12,7 +15,13 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.util.function.FloatSupplier;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import frc.lib.logfields.logfields.BooleanLogField;
+import frc.lib.logfields.logfields.DoubleLogField;
+import frc.lib.logfields.logfields.FloatLogField;
+import frc.lib.logfields.logfields.IntegerLogField;
+import frc.lib.logfields.logfields.LogField;
 
 public class LogFieldsTable implements LoggableInputs {
     private final static ArrayList<LogFieldsTable> createdTables = new ArrayList<>();
@@ -63,7 +72,7 @@ public class LogFieldsTable implements LoggableInputs {
         this.periodicBeforeFields = periodicRunnable;
     }
 
-    private <T> LogField<T> registerField(LogField<T> field) {
+    private <T extends LoggableInputs> T registerField(T field) {
         fields.add(field);
         Logger.getInstance().processInputs(name, field); // so in the init cycle the value will still update and logged/replayed.
         return field;
@@ -73,69 +82,54 @@ public class LogFieldsTable implements LoggableInputs {
             String name,
             Supplier<byte[]> valueSupplier,
             byte[] defaultValue) {
-        return registerField(new LogField<>(
-                valueSupplier,
-                (table) -> table.getRaw(name, defaultValue),
-                (table, value) -> table.put(name, value)));
+        return registerField(new LogField<>(name, valueSupplier, LogTable::getRaw, LogTable::put));
     }
 
     public Supplier<byte[]> addRaw(String name, Supplier<byte[]> valueSupplier) {
         return addRaw(name, valueSupplier, new byte[] {});
     }
 
-    public Supplier<Boolean> addBoolean(
+    public BooleanSupplier addBoolean(
             String name,
-            Supplier<Boolean> valueSupplier,
+            BooleanSupplier valueSupplier,
             boolean defaultValue) {
-        return registerField(new LogField<>(
-                valueSupplier,
-                (table) -> table.getBoolean(name, defaultValue),
-                (table, value) -> table.put(name, value)));
+        return registerField(new BooleanLogField(name, valueSupplier, defaultValue));
     }
 
-    public Supplier<Boolean> addBoolean(String name, Supplier<Boolean> valueSupplier) {
+    public BooleanSupplier addBoolean(String name, BooleanSupplier valueSupplier) {
         return addBoolean(name, valueSupplier, false);
     }
 
-    public Supplier<Long> addInteger(
+    public LongSupplier addInteger(
             String name,
-            Supplier<Long> valueSupplier,
+            LongSupplier valueSupplier,
             long defaultValue) {
-        return registerField(new LogField<>(
-                valueSupplier,
-                (table) -> table.getInteger(name, defaultValue),
-                (table, value) -> table.put(name, value)));
+        return registerField(new IntegerLogField(name, valueSupplier, defaultValue));
     }
 
-    public Supplier<Long> addInteger(String name, Supplier<Long> valueSupplier) {
+    public LongSupplier addInteger(String name, LongSupplier valueSupplier) {
         return addInteger(name, valueSupplier, 0);
     }
 
-    public Supplier<Float> addFloat(
+    public FloatSupplier addFloat(
             String name,
-            Supplier<Float> valueSupplier,
+            FloatSupplier valueSupplier,
             float defaultValue) {
-        return registerField(new LogField<>(
-                valueSupplier,
-                (table) -> table.getFloat(name, defaultValue),
-                (table, value) -> table.put(name, value)));
+        return registerField(new FloatLogField(name, valueSupplier, defaultValue));
     }
 
-    public Supplier<Float> addFloat(String name, Supplier<Float> valueSupplier) {
+    public FloatSupplier addFloat(String name, FloatSupplier valueSupplier) {
         return addFloat(name, valueSupplier, 0);
     }
 
-    public Supplier<Double> addDouble(
+    public DoubleSupplier addDouble(
             String name,
-            Supplier<Double> valueSupplier,
+            DoubleSupplier valueSupplier,
             double defaultValue) {
-        return registerField(new LogField<>(
-                valueSupplier,
-                (table) -> table.getDouble(name, defaultValue),
-                (table, value) -> table.put(name, value)));
+        return registerField(new DoubleLogField(name, valueSupplier, defaultValue));
     }
 
-    public Supplier<Double> addDouble(String name, Supplier<Double> valueSupplier) {
+    public DoubleSupplier addDouble(String name, DoubleSupplier valueSupplier) {
         return addDouble(name, valueSupplier, 0);
     }
 
@@ -143,10 +137,7 @@ public class LogFieldsTable implements LoggableInputs {
             String name,
             Supplier<String> valueSupplier,
             String defaultValue) {
-        return registerField(new LogField<>(
-                valueSupplier,
-                (table) -> table.getString(name, defaultValue),
-                (table, value) -> table.put(name, value)));
+        return registerField(new LogField<>(name, valueSupplier, LogTable::getString, LogTable::put));
     }
 
     public Supplier<String> addString(String name, Supplier<String> valueSupplier) {
@@ -157,10 +148,7 @@ public class LogFieldsTable implements LoggableInputs {
             String name,
             Supplier<boolean[]> valueSupplier,
             boolean[] defaultValue) {
-        return registerField(new LogField<>(
-                valueSupplier,
-                (table) -> table.getBooleanArray(name, defaultValue),
-                (table, value) -> table.put(name, value)));
+        return registerField(new LogField<>(name, valueSupplier, LogTable::getBooleanArray, LogTable::put));
     }
 
     public Supplier<boolean[]> addBooleanArray(String name, Supplier<boolean[]> valueSupplier) {
@@ -171,10 +159,7 @@ public class LogFieldsTable implements LoggableInputs {
             String name,
             Supplier<long[]> valueSupplier,
             long[] defaultValue) {
-        return registerField(new LogField<>(
-                valueSupplier,
-                (table) -> table.getIntegerArray(name, defaultValue),
-                (table, value) -> table.put(name, value)));
+        return registerField(new LogField<>(name, valueSupplier, LogTable::getIntegerArray, LogTable::put));
     }
 
     public Supplier<long[]> addIntegerArray(String name, Supplier<long[]> valueSupplier) {
@@ -185,10 +170,7 @@ public class LogFieldsTable implements LoggableInputs {
             String name,
             Supplier<float[]> valueSupplier,
             float[] defaultValue) {
-        return registerField(new LogField<>(
-                valueSupplier,
-                (table) -> table.getFloatArray(name, defaultValue),
-                (table, value) -> table.put(name, value)));
+        return registerField(new LogField<>(name, valueSupplier, LogTable::getFloatArray, LogTable::put));
     }
 
     public Supplier<float[]> addFloatArray(String name, Supplier<float[]> valueSupplier) {
@@ -199,10 +181,7 @@ public class LogFieldsTable implements LoggableInputs {
             String name,
             Supplier<double[]> valueSupplier,
             double[] defaultValue) {
-        return registerField(new LogField<>(
-                valueSupplier,
-                (table) -> table.getDoubleArray(name, defaultValue),
-                (table, value) -> table.put(name, value)));
+        return registerField(new LogField<>(name, valueSupplier, LogTable::getDoubleArray, LogTable::put));
     }
 
     public Supplier<double[]> addDoubleArray(String name, Supplier<double[]> valueSupplier) {
@@ -213,10 +192,7 @@ public class LogFieldsTable implements LoggableInputs {
             String name,
             Supplier<String[]> valueSupplier,
             String[] defaultValue) {
-        return registerField(new LogField<>(
-                valueSupplier,
-                (table) -> table.getStringArray(name, defaultValue),
-                (table, value) -> table.put(name, value)));
+        return registerField(new LogField<>(name, valueSupplier, LogTable::getStringArray, LogTable::put));
     }
 
     public Supplier<String[]> addStringArray(String name, Supplier<String[]> valueSupplier) {

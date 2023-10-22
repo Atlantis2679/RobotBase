@@ -5,13 +5,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import frc.lib.RefValue;
 import frc.lib.logfields.LogFieldsTable;
+import frc.lib.refvalues.BooleanRefValue;
+import frc.lib.refvalues.DoubleRefValue;
+import frc.lib.refvalues.RefValue;
 import frc.lib.tuneables.sendableproperties.BooleanSendableProperty;
 import frc.lib.tuneables.sendableproperties.NumberSendableProperty;
 import frc.lib.tuneables.sendableproperties.SendableProperty;
@@ -45,22 +49,22 @@ public class TuneablesTable implements Tuneable {
         tuneablesNode.put(name, tuneable);
     }
 
-    public void addBoolean(String key, Supplier<Boolean> getter, Consumer<Boolean> setter) {
+    public void addBoolean(String key, BooleanSupplier getter, Consumer<Boolean> setter) {
         propertyNodes.add((fields, builder) -> new BooleanSendableProperty(key, getter, setter, fields, builder));
     }
 
-    public RefValue<Boolean> addBoolean(String key, boolean defaultValue) {
-        RefValue<Boolean> refValue = new RefValue<Boolean>(defaultValue);
+    public BooleanRefValue addBoolean(String key, boolean defaultValue) {
+        BooleanRefValue refValue = new BooleanRefValue(defaultValue);
         addBoolean(key, refValue::get, refValue::set);
         return refValue;
     }
 
-    public void addNumber(String key, Supplier<Double> getter, Consumer<Double> setter) {
+    public void addNumber(String key, DoubleSupplier getter, Consumer<Double> setter) {
         propertyNodes.add((fields, builder) -> new NumberSendableProperty(key, getter, setter, fields, builder));
     }
 
-    public RefValue<Double> addNumber(String key, Double defaultValue) {
-        RefValue<Double> refValue = new RefValue<Double>(defaultValue);
+    public DoubleRefValue addNumber(String key, Double defaultValue) {
+        DoubleRefValue refValue = new DoubleRefValue(defaultValue);
         addNumber(key, refValue::get, refValue::set);
         return refValue;
     }
