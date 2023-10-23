@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.function.BooleanSupplier;
 
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LogTable;
@@ -66,8 +67,8 @@ public class Robot extends LoggedRobot {
                 logger.recordMetadata("GitDirty", "Unknown");
                 break;
         }
-
-        if (isSimulation() && Constants.REPLAY) {
+        
+        if (isSimulation() && getIsReplay()) {
             setUseTiming(false);
             String logPath = LogFileUtil.findReplayLog();
             logger.setReplaySource(new WPILOGReader(logPath));
@@ -89,9 +90,15 @@ public class Robot extends LoggedRobot {
         logger.start();
     }
 
+    // in a method to avoid unreachable code warning.
+    private boolean getIsReplay() {
+        return Constants.REPLAY;
+    }
+
     @Override
     public void robotInit() {
         initializeAdvantageKit();
+        enableLiveWindowInTest(false);
         robotContainer = new RobotContainer();
     }
 
@@ -135,7 +142,6 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void testInit() {
-        CommandScheduler.getInstance().enable();
         teleopInit();
     }
 
