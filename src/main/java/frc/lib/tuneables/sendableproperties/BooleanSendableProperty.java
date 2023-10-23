@@ -1,21 +1,21 @@
 package frc.lib.tuneables.sendableproperties;
 
 import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import frc.lib.logfields.LogFieldsTable;
 
-public class BooleanSendableProperty implements SendableProperty {
+public class BooleanSendableProperty extends TuneableProperty {
     private final Supplier<boolean[]> field;
     private boolean[] valueFromNetwork = {};
-    private final Consumer<Boolean> setter;
+    private final BooleanConsumer setter;
 
     public BooleanSendableProperty(
             String key,
             BooleanSupplier getter,
-            Consumer<Boolean> setter,
+            BooleanConsumer setter,
             LogFieldsTable fieldsTable,
             SendableBuilder sendableBuilder) {
         this.setter = setter;

@@ -6,12 +6,12 @@ import java.util.function.Supplier;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import frc.lib.logfields.LogFieldsTable;
 
-public class StringSendableProperty implements SendableProperty {
+public class StringTunableProperty extends TuneableProperty {
     private final Supplier<String[]> field;
     private String[] valueFromNetwork = {};
     private final Consumer<String> setter;
 
-    public StringSendableProperty(
+    public StringTunableProperty(
             String key,
             Supplier<String> getter,
             Consumer<String> setter,
