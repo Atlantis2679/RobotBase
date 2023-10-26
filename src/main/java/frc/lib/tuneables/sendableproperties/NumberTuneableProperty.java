@@ -7,12 +7,12 @@ import java.util.function.Supplier;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import frc.lib.logfields.LogFieldsTable;
 
-public class NumberTunableProperty extends TuneableProperty {
+public class NumberTuneableProperty extends TuneableProperty {
     private final Supplier<double[]> field;
     private double[] valueFromNetwork = {};
     private final DoubleConsumer setter;
 
-    public NumberTunableProperty(
+    public NumberTuneableProperty(
             String key,
             DoubleSupplier getter,
             DoubleConsumer setter,
@@ -26,18 +26,11 @@ public class NumberTunableProperty extends TuneableProperty {
             return newValue;
         });
 
-        sendableBuilder.addDoubleProperty(
-                key,
-                () -> {
-                    double outputValue = getter.getAsDouble();
-                    fieldsTable.recordOutput(key, outputValue);
-                    return outputValue;
-                },
-                value -> valueFromNetwork = new double[] { value });
+        sendableBuilder.addDoubleProperty(key, getter, value -> valueFromNetwork = new double[] { value });
     }
 
     @Override
-    public void updateSetter() {
+    protected void updateSetter() {
         if (field.get().length != 0) {
             setter.accept(field.get()[0]);
         }

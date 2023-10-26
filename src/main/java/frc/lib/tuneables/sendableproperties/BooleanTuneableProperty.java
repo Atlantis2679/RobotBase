@@ -7,12 +7,12 @@ import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import frc.lib.logfields.LogFieldsTable;
 
-public class BooleanSendableProperty extends TuneableProperty {
+public class BooleanTuneableProperty extends TuneableProperty {
     private final Supplier<boolean[]> field;
     private boolean[] valueFromNetwork = {};
     private final BooleanConsumer setter;
 
-    public BooleanSendableProperty(
+    public BooleanTuneableProperty(
             String key,
             BooleanSupplier getter,
             BooleanConsumer setter,
@@ -26,18 +26,11 @@ public class BooleanSendableProperty extends TuneableProperty {
             return newValue;
         });
 
-        sendableBuilder.addBooleanProperty(
-                key,
-                () -> {
-                    boolean outputValue = getter.getAsBoolean();
-                    fieldsTable.recordOutput(key, outputValue);
-                    return outputValue;
-                },
-                value -> valueFromNetwork = new boolean[] { value });
+        sendableBuilder.addBooleanProperty(key, getter, value -> valueFromNetwork = new boolean[] { value });
     }
 
     @Override
-    public void updateSetter() {
+    protected void updateSetter() {
         if (field.get().length != 0) {
             setter.accept(field.get()[0]);
         }

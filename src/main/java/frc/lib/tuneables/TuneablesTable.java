@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
@@ -13,45 +12,48 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
-import frc.lib.logfields.LogFieldsTable;
 import frc.lib.refvalues.BooleanRefValue;
 import frc.lib.refvalues.DoubleRefValue;
 import frc.lib.refvalues.RefValue;
-import frc.lib.tuneables.sendableproperties.BooleanSendableProperty;
-import frc.lib.tuneables.sendableproperties.NumberTunableProperty;
-import frc.lib.tuneables.sendableproperties.TuneableProperty;
-import frc.lib.tuneables.sendableproperties.StringTunableProperty;
 
 public class TuneablesTable implements Tuneable {
     private final SendableType sendableType;
     private final List<PropertyNode> propertyNodes = new ArrayList<>();
     private final Map<String, Tuneable> tuneablesNode = new HashMap<>();
 
-    private final List<TuneableProperty> sendableProperties = new ArrayList<>();
+    public enum SendableType {
+        NONE(null),
+        LIST("LW Subsystem");
+    
+        private String stringType;
+    
+        private SendableType(String stringType) {
+            this.stringType = stringType;
+        }
+    
+        public String getStringType() {
+            return stringType;
+        }
+    }    
 
     private interface PropertyNode {
-        TuneableProperty createSendableProperty(LogFieldsTable fieldsTable, SendableBuilder sendableBuilder);
+        void addToBuilder(TuneableBuilder tuneableBuilder);
     }
 
     public TuneablesTable(SendableType sendableType) {
         this.sendableType = sendableType;
     }
 
-    public void addVisualizer(String name, Sendable sendable) {
-        addTuneable(name, (key, sendablePublisher) -> {
-            sendablePublisher.accept(key, builder -> {
-                sendable.initSendable(new VisualizerSendableBuilder(builder));
-            });
-        });
-    }
-
-    public void addTuneable(String name, Tuneable tuneable) {
+    public void addChild(String name, Tuneable tuneable) {
         tuneablesNode.put(name, tuneable);
     }
 
+    public void addChild(String name, Sendable tuneable) {
+        tuneablesNode.put(name, tuneable::initSendable);
+    }
+
     public void addBoolean(String key, BooleanSupplier getter, BooleanConsumer setter) {
-        propertyNodes.add((fields, builder) -> new BooleanSendableProperty(key, getter, setter, fields, builder));
+        propertyNodes.add((builder) -> builder.addBooleanProperty(key, getter, setter));
     }
 
     public BooleanRefValue addBoolean(String key, boolean defaultValue) {
@@ -61,7 +63,7 @@ public class TuneablesTable implements Tuneable {
     }
 
     public void addNumber(String key, DoubleSupplier getter, DoubleConsumer setter) {
-        propertyNodes.add((fields, builder) -> new NumberTunableProperty(key, getter, setter, fields, builder));
+        propertyNodes.add((builder) -> builder.addDoubleProperty(key, getter, setter));
     }
 
     public DoubleRefValue addNumber(String key, Double defaultValue) {
@@ -71,7 +73,7 @@ public class TuneablesTable implements Tuneable {
     }
 
     public void addString(String key, Supplier<String> getter, Consumer<String> setter) {
-        propertyNodes.add((fields, builder) -> new StringTunableProperty(key, getter, setter, fields, builder));
+        propertyNodes.add((builder) -> builder.addStringProperty(key, getter, setter));
     }
 
     public RefValue<String> addString(String key, String defaultValue) {
@@ -81,19 +83,17 @@ public class TuneablesTable implements Tuneable {
     }
 
     @Override
-    public void publish(String key, BiConsumer<String, Sendable> sendablePublisher) {
-        sendablePublisher.accept(key, builder -> {
-            if (sendableType != SendableType.NONE) {
-                builder.setSmartDashboardType(sendableType.getStringType());
-            }
-            LogFieldsTable fieldsTable = new LogFieldsTable(LOG_PREFIX + key);
-            for (PropertyNode propertyNode : propertyNodes) {
-                sendableProperties.add(propertyNode.createSendableProperty(fieldsTable, builder));
-            }
-        });
+    public void initTuneable(TuneableBuilder builder) {
+        if (sendableType != SendableType.NONE) {
+            builder.setSmartDashboardType(sendableType.getStringType());
+        }
+
+        for (PropertyNode propertyNode : propertyNodes) {
+            propertyNode.addToBuilder(builder);
+        }
 
         tuneablesNode.forEach((name, tuneable) -> {
-            tuneable.publish(key + "/" + name, sendablePublisher);
+            builder.addChild(name, tuneable);
         });
     }
 }

@@ -6,12 +6,12 @@ import java.util.function.Supplier;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import frc.lib.logfields.LogFieldsTable;
 
-public class StringTunableProperty extends TuneableProperty {
+public class StringTuneableProperty extends TuneableProperty {
     private final Supplier<String[]> field;
     private String[] valueFromNetwork = {};
     private final Consumer<String> setter;
 
-    public StringTunableProperty(
+    public StringTuneableProperty(
             String key,
             Supplier<String> getter,
             Consumer<String> setter,
@@ -25,18 +25,11 @@ public class StringTunableProperty extends TuneableProperty {
             return newValue;
         });
 
-        sendableBuilder.addStringProperty(
-                key,
-                () -> {
-                    String outputValue = getter.get();
-                    fieldsTable.recordOutput(key, outputValue);
-                    return outputValue;
-                },
-                value -> valueFromNetwork = new String[] { value });
+        sendableBuilder.addStringProperty(key, getter, value -> valueFromNetwork = new String[] { value });
     }
 
     @Override
-    public void updateSetter() {
+    protected void updateSetter() {
         if (field.get().length != 0) {
             setter.accept(field.get()[0]);
         }

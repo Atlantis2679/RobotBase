@@ -1,5 +1,6 @@
 package frc.lib.tuneables;
 
+import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
@@ -14,13 +15,24 @@ import edu.wpi.first.networktables.Topic;
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.util.function.FloatConsumer;
 import edu.wpi.first.util.function.FloatSupplier;
+import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import frc.lib.logfields.LogFieldsTable;
+import frc.lib.tuneables.sendableproperties.BooleanTuneableProperty;
+import frc.lib.tuneables.sendableproperties.NumberTuneableProperty;
+import frc.lib.tuneables.sendableproperties.StringTuneableProperty;
 
-public class VisualizerSendableBuilder implements NTSendableBuilder {
+public class TuneableBuilder implements NTSendableBuilder {
     private final SendableBuilder baseBuilder;
+    private final LogFieldsTable fieldsTable;
+    private final BiConsumer<String, Sendable> sendablePublisher;
+    private final String key;
 
-    public VisualizerSendableBuilder(SendableBuilder baseBuilder) {
+    public TuneableBuilder(SendableBuilder baseBuilder, String key, BiConsumer<String, Sendable> sendablePublisher) {
         this.baseBuilder = baseBuilder;
+        this.key = key;
+        this.fieldsTable = new LogFieldsTable("Tuneables/" + key);
+        this.sendablePublisher = sendablePublisher;
     }
 
     @Override
@@ -45,7 +57,10 @@ public class VisualizerSendableBuilder implements NTSendableBuilder {
 
     @Override
     public void addBooleanProperty(String key, BooleanSupplier getter, BooleanConsumer setter) {
-        baseBuilder.addBooleanProperty(key, getter, null);
+        if (setter != null)
+            new BooleanTuneableProperty(key, getter, setter, fieldsTable, baseBuilder);
+        else
+            baseBuilder.addBooleanProperty(key, getter, setter);
     }
 
     @Override
@@ -60,12 +75,18 @@ public class VisualizerSendableBuilder implements NTSendableBuilder {
 
     @Override
     public void addDoubleProperty(String key, DoubleSupplier getter, DoubleConsumer setter) {
-        baseBuilder.addDoubleProperty(key, getter, null);
+        if (setter != null)
+            new NumberTuneableProperty(key, getter, setter, fieldsTable, baseBuilder);
+        else
+            baseBuilder.addDoubleProperty(key, getter, setter);
     }
 
     @Override
     public void addStringProperty(String key, Supplier<String> getter, Consumer<String> setter) {
-        baseBuilder.addStringProperty(key, getter, null);
+        if (setter != null)
+            new StringTuneableProperty(key, getter, setter, fieldsTable, baseBuilder);
+        else
+            baseBuilder.addStringProperty(key, getter, setter);
     }
 
     @Override
@@ -136,5 +157,13 @@ public class VisualizerSendableBuilder implements NTSendableBuilder {
     @Override
     public NetworkTable getTable() {
         return ((NTSendableBuilder) baseBuilder).getTable();
+    }
+
+    public void addChild(String name, Tuneable tuneable) {
+        Tuneables.add(this.key + "/" + name, tuneable, sendablePublisher);
+    }
+
+    public void addChild(String name, Sendable sendable) {
+        Tuneables.add(this.key + "/" + name, sendable, sendablePublisher);
     }
 }
