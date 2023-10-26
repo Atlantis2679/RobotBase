@@ -21,21 +21,6 @@ public class TuneablesTable implements Tuneable {
     private final List<PropertyNode> propertyNodes = new ArrayList<>();
     private final Map<String, Tuneable> tuneablesNode = new HashMap<>();
 
-    public enum SendableType {
-        NONE(null),
-        LIST("LW Subsystem");
-    
-        private String stringType;
-    
-        private SendableType(String stringType) {
-            this.stringType = stringType;
-        }
-    
-        public String getStringType() {
-            return stringType;
-        }
-    }    
-
     private interface PropertyNode {
         void addToBuilder(TuneableBuilder tuneableBuilder);
     }

@@ -1,23 +1,22 @@
 package frc.lib.tuneables;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.function.BiConsumer;
 
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.lib.tuneables.sendableproperties.TuneableProperty;
 
 public class Tuneables {
-    private static Map<String, Pair<Tuneable, BiConsumer<String, Sendable>>> waitingToEnableTuneables = new HashMap<>();
+    private static Queue<TuneableItem> newTuneablesQueue = new LinkedList<>();
     private static boolean isEnabled = false;
 
     public static void add(String key, Tuneable tuneable, BiConsumer<String, Sendable> sendablePublisher) {
-        if (isEnabled)
-            publishTuneable(key, tuneable, sendablePublisher);
-        else
-            waitingToEnableTuneables.put(key, new Pair<>(tuneable, sendablePublisher));
+        // does not instantly add even when enabled to avoid publishing from inside
+        // initTuneable addChild() call.
+        // doing that leads to ConcurrentModificationException with shuffleboard.
+        newTuneablesQueue.add(new TuneableItem(key, tuneable, sendablePublisher));
     }
 
     public static void add(String key, Tuneable tuneable) {
@@ -25,7 +24,7 @@ public class Tuneables {
     }
 
     public static void add(String key, Sendable sendable, BiConsumer<String, Sendable> sendablePublisher) {
-        add(key, (Tuneable) sendable::initSendable, sendablePublisher);
+        newTuneablesQueue.add(new TuneableItem(key, sendable::initSendable, sendablePublisher));
     }
 
     public static void add(String key, Sendable sendable) {
@@ -33,21 +32,41 @@ public class Tuneables {
     }
 
     public static void enable() {
-        if(!isEnabled){
+        if (!isEnabled) {
             isEnabled = true;
-            waitingToEnableTuneables.forEach((key, tuneableAndPublisher) -> {
-                publishTuneable(key, tuneableAndPublisher.getFirst(), tuneableAndPublisher.getSecond());
-            });
+            update();
         }
     }
 
-    private static void publishTuneable(String name, Tuneable tuneable, BiConsumer<String, Sendable> sendablePublisher) {
+    private static void publishTuneable(
+            String name,
+            Tuneable tuneable,
+            BiConsumer<String, Sendable> sendablePublisher) {
         sendablePublisher.accept(name, (builder) -> {
             tuneable.initTuneable(new TuneableBuilder(builder, name, sendablePublisher));
         });
     }
 
     public static void update() {
-        TuneableProperty.updateAll();
+        if (isEnabled) {
+            TuneableProperty.updateAll();
+
+            while (!newTuneablesQueue.isEmpty()) {
+                TuneableItem item = newTuneablesQueue.poll();
+                publishTuneable(item.key, item.tuneable, item.sendablePublisher);
+            }
+        }
+    }
+
+    private static class TuneableItem {
+        public final String key;
+        public final Tuneable tuneable;
+        public final BiConsumer<String, Sendable> sendablePublisher;
+
+        public TuneableItem(String key, Tuneable tuneable, BiConsumer<String, Sendable> sendablePublisher) {
+            this.key = key;
+            this.tuneable = tuneable;
+            this.sendablePublisher = sendablePublisher;
+        }
     }
 }

@@ -45,6 +45,10 @@ public class TuneableBuilder implements NTSendableBuilder {
         baseBuilder.setSmartDashboardType(type);
     }
 
+    public void setSendableType(SendableType sendableType) {
+        setSmartDashboardType(sendableType.getStringType());
+    }
+
     @Override
     public void setActuator(boolean value) {
         baseBuilder.setActuator(value);
