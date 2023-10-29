@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.logfields.LogFieldsTable;
+import frc.lib.tuneables.TuneablesManager;
 
 public class Robot extends LoggedRobot {
     private Command autonomousCommand;
@@ -104,6 +105,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotPeriodic() {
         LogFieldsTable.updateAll();
+        TuneablesManager.update();
         CommandScheduler.getInstance().run();
     }
 
@@ -141,6 +143,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void testInit() {
+        TuneablesManager.enable();
         teleopInit();
     }
 
