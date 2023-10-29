@@ -8,14 +8,14 @@ import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.lib.tuneables.sendableproperties.TuneableProperty;
 
-public class Tuneables {
+public class TuneablesManager {
     private static Queue<TuneableItem> newTuneablesQueue = new LinkedList<>();
     private static boolean isEnabled = false;
 
     public static void add(String key, Tuneable tuneable, BiConsumer<String, Sendable> sendablePublisher) {
-        // does not instantly add even when enabled to avoid publishing from inside
-        // initTuneable addChild() call.
-        // doing that leads to ConcurrentModificationException with shuffleboard.
+        // does not instantly publish even when enabled to avoid publishing from inside
+        // initTuneable addChild() call, beacause doing that leads to
+        // ConcurrentModificationException with shuffleboard.
         newTuneablesQueue.add(new TuneableItem(key, tuneable, sendablePublisher));
     }
 

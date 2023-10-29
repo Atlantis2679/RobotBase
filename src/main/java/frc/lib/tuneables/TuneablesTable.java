@@ -33,8 +33,8 @@ public class TuneablesTable implements Tuneable {
         tuneablesNode.put(name, tuneable);
     }
 
-    public void addChild(String name, Sendable tuneable) {
-        tuneablesNode.put(name, tuneable::initSendable);
+    public void addChild(String name, Sendable sendable) {
+        tuneablesNode.put(name, sendable::initSendable);
     }
 
     public void addBoolean(String key, BooleanSupplier getter, BooleanConsumer setter) {
