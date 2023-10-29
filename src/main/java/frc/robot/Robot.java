@@ -56,8 +56,19 @@ public class Robot extends LoggedRobot {
         logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
         logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
         logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
-
-        if (isSimulation() && Constants.REPLAY) {
+        switch (BuildConstants.DIRTY) {
+            case 0:
+                logger.recordMetadata("GitDirty", "All changes committed");
+                break;
+            case 1:
+                logger.recordMetadata("GitDirty", "Uncomitted changes");
+                break;
+            default:
+                logger.recordMetadata("GitDirty", "Unknown");
+                break;
+        }
+        
+        if (isSimulation() && getIsReplay()) {
             setUseTiming(false);
             String logPath = LogFileUtil.findReplayLog();
             logger.setReplaySource(new WPILOGReader(logPath));
@@ -79,9 +90,15 @@ public class Robot extends LoggedRobot {
         logger.start();
     }
 
+    // in a method to avoid unreachable code warning.
+    private boolean getIsReplay() {
+        return Constants.REPLAY;
+    }
+
     @Override
     public void robotInit() {
         initializeAdvantageKit();
+        enableLiveWindowInTest(false);
         robotContainer = new RobotContainer();
     }
 
