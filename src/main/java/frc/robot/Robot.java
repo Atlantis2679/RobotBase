@@ -1,5 +1,6 @@
 package frc.robot;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,6 +20,7 @@ import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.logfields.LogFieldsTable;
+import frc.lib.tuneables.TuneablesManager;
 
 public class Robot extends LoggedRobot {
     private Command autonomousCommand;
@@ -28,16 +30,21 @@ public class Robot extends LoggedRobot {
         if (isReal()) {
             try {
                 // prefer a mounted USB drive if one is accessible
-                Path usbDir = Paths.get("/u").toRealPath();
-                if (Files.isWritable(usbDir)) {
-                    return usbDir.toString();
+                Path usbDirPath = Paths.get("/u").toRealPath();
+                if (Files.isWritable(usbDirPath)) {
+                    return usbDirPath.toString();
                 }
             } catch (IOException ex) {
                 // ignored
             }
         }
-        String path = Filesystem.getOperatingDirectory().getAbsolutePath();
-        return isReal() ? path : path + "\\logs";
+
+        File directory = Filesystem.getOperatingDirectory();
+        if (isSimulation()) {
+            directory = new File(directory, "simlogs");
+            directory.mkdir();
+        }
+        return directory.getAbsolutePath();
     }
 
     private void initializeAdvantageKit() {
@@ -81,6 +88,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotPeriodic() {
         LogFieldsTable.updateAll();
+        TuneablesManager.update();
         CommandScheduler.getInstance().run();
     }
 
@@ -119,6 +127,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void testInit() {
         CommandScheduler.getInstance().enable();
+        TuneablesManager.enable();
         teleopInit();
     }
 

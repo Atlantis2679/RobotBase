@@ -175,5 +175,5 @@ out/
 src/main/java/frc/robot/BuildConstants.java
 simgui-ds.json
 simgui.json
-/logs
-.vscode
+/simlogs
+networktables.json
