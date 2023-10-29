@@ -164,10 +164,10 @@ public class TuneableBuilder implements NTSendableBuilder {
     }
 
     public void addChild(String name, Tuneable tuneable) {
-        Tuneables.add(this.key + "/" + name, tuneable, sendablePublisher);
+        TuneablesManager.add(this.key + "/" + name, tuneable, sendablePublisher);
     }
 
     public void addChild(String name, Sendable sendable) {
-        Tuneables.add(this.key + "/" + name, sendable, sendablePublisher);
+        TuneablesManager.add(this.key + "/" + name, sendable, sendablePublisher);
     }
 }
