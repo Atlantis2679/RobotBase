@@ -1,7 +1,7 @@
 package frc.lib.refvalues;
 
 public class IntRefValue {
-    public int value;
+    private int value;
 
     public IntRefValue(int value) {
         this.value = value;

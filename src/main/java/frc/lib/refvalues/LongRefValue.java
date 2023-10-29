@@ -1,7 +1,7 @@
 package frc.lib.refvalues;
 
 public class LongRefValue {
-    public long value;
+    private long value;
 
     public LongRefValue(long value) {
         this.value = value;

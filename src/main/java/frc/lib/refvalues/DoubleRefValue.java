@@ -1,7 +1,7 @@
 package frc.lib.refvalues;
 
 public class DoubleRefValue {
-    public double value;
+    private double value;
 
     public DoubleRefValue(double value) {
         this.value = value;

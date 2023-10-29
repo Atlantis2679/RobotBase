@@ -1,7 +1,7 @@
 package frc.lib.refvalues;
 
 public class BooleanRefValue {
-    public boolean value;
+    private boolean value;
 
     public BooleanRefValue(boolean value) {
         this.value = value;
