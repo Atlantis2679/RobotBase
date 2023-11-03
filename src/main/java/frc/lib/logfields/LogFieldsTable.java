@@ -66,7 +66,7 @@ public class LogFieldsTable implements LoggableInputs {
     }
 
     public void setPeriodicBeforeFields(Runnable periodicRunnable) {
-        if(fields.isEmpty()){
+        if(fields.isEmpty() && !Logger.getInstance().hasReplaySource()){
             periodicRunnable.run(); // so in the init cycle this will still run before the fields.
         }
         this.periodicBeforeFields = periodicRunnable;
