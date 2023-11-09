@@ -25,6 +25,7 @@ public class BooleanTuneableProperty extends TuneableProperty {
             valueFromNetwork = new boolean[] {};
             return newValue;
         });
+        fieldsTable.update();
 
         sendableBuilder.addBooleanProperty(key, getter, value -> valueFromNetwork = new boolean[] { value });
     }

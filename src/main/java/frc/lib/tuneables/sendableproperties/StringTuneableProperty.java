@@ -24,6 +24,7 @@ public class StringTuneableProperty extends TuneableProperty {
             valueFromNetwork = new String[] {};
             return newValue;
         });
+        fieldsTable.update();
 
         sendableBuilder.addStringProperty(key, getter, value -> valueFromNetwork = new String[] { value });
     }

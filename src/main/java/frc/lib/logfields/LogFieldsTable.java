@@ -38,13 +38,17 @@ public class LogFieldsTable implements LoggableInputs {
         createdTables.add(this);
     }
 
-    public static void updateAll() {
+    public static void updateAllTables() {
         for (LogFieldsTable fieldsTable : createdTables) {
-            if (fieldsTable.periodicBeforeFields != null && !Logger.getInstance().hasReplaySource()) {
-                fieldsTable.periodicBeforeFields.run();
-            }
-            Logger.getInstance().processInputs(fieldsTable.name, fieldsTable);
+            fieldsTable.update();
         }
+    }
+
+    public void update() {
+        if (periodicBeforeFields != null && !Logger.getInstance().hasReplaySource()) {
+            periodicBeforeFields.run();
+        }
+        Logger.getInstance().processInputs(name, this);
     }
 
     public LogFieldsTable getSubTable(String name) {
@@ -66,15 +70,11 @@ public class LogFieldsTable implements LoggableInputs {
     }
 
     public void setPeriodicBeforeFields(Runnable periodicRunnable) {
-        if(fields.isEmpty()){
-            periodicRunnable.run(); // so in the init cycle this will still run before the fields.
-        }
         this.periodicBeforeFields = periodicRunnable;
     }
 
     private <T extends LoggableInputs> T registerField(T field) {
         fields.add(field);
-        Logger.getInstance().processInputs(name, field); // so in the init cycle the value will still update and logged/replayed.
         return field;
     }
 
