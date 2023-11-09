@@ -25,6 +25,7 @@ public class NumberTuneableProperty extends TuneableProperty {
             valueFromNetwork = new double[] {};
             return newValue;
         });
+        fieldsTable.update();
 
         sendableBuilder.addDoubleProperty(key, getter, value -> valueFromNetwork = new double[] { value });
     }

@@ -104,7 +104,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotPeriodic() {
-        LogFieldsTable.updateAll();
+        LogFieldsTable.updateAllTables();
         TuneablesManager.update();
         CommandScheduler.getInstance().run();
     }
