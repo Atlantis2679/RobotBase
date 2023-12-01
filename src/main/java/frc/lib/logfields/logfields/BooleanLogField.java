@@ -32,6 +32,6 @@ public class BooleanLogField implements BooleanSupplier, LoggableInputs {
 
     @Override
     public void fromLog(LogTable table) {
-        value = table.getBoolean(name, value);
+        value = table.get(name, value);
     }
 }

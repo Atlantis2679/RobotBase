@@ -12,9 +12,9 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.util.sendable.Sendable;
-import frc.lib.refvalues.BooleanRefValue;
-import frc.lib.refvalues.DoubleRefValue;
-import frc.lib.refvalues.RefValue;
+import frc.lib.valueholders.BooleanHolder;
+import frc.lib.valueholders.DoubleHolder;
+import frc.lib.valueholders.ValueHolder;
 
 public class TuneablesTable implements Tuneable {
     private final SendableType sendableType;
@@ -41,8 +41,8 @@ public class TuneablesTable implements Tuneable {
         propertyNodes.add((builder) -> builder.addBooleanProperty(key, getter, setter));
     }
 
-    public BooleanRefValue addBoolean(String key, boolean defaultValue) {
-        BooleanRefValue refValue = new BooleanRefValue(defaultValue);
+    public BooleanHolder addBoolean(String key, boolean defaultValue) {
+        BooleanHolder refValue = new BooleanHolder(defaultValue);
         addBoolean(key, refValue::get, refValue::set);
         return refValue;
     }
@@ -51,8 +51,8 @@ public class TuneablesTable implements Tuneable {
         propertyNodes.add((builder) -> builder.addDoubleProperty(key, getter, setter));
     }
 
-    public DoubleRefValue addNumber(String key, Double defaultValue) {
-        DoubleRefValue refValue = new DoubleRefValue(defaultValue);
+    public DoubleHolder addNumber(String key, Double defaultValue) {
+        DoubleHolder refValue = new DoubleHolder(defaultValue);
         addNumber(key, refValue::get, refValue::set);
         return refValue;
     }
@@ -61,8 +61,8 @@ public class TuneablesTable implements Tuneable {
         propertyNodes.add((builder) -> builder.addStringProperty(key, getter, setter));
     }
 
-    public RefValue<String> addString(String key, String defaultValue) {
-        RefValue<String> refValue = new RefValue<String>(defaultValue);
+    public ValueHolder<String> addString(String key, String defaultValue) {
+        ValueHolder<String> refValue = new ValueHolder<String>(defaultValue);
         addString(key, refValue::get, refValue::set);
         return refValue;
     }

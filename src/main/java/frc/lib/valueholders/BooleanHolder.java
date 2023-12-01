@@ -1,9 +1,9 @@
-package frc.lib.refvalues;
+package frc.lib.valueholders;
 
-public class BooleanRefValue {
+public class BooleanHolder {
     private boolean value;
 
-    public BooleanRefValue(boolean value) {
+    public BooleanHolder(boolean value) {
         this.value = value;
     }
 

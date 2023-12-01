@@ -1,9 +1,9 @@
-package frc.lib.refvalues;
+package frc.lib.valueholders;
 
-public class DoubleRefValue {
+public class DoubleHolder {
     private double value;
 
-    public DoubleRefValue(double value) {
+    public DoubleHolder(double value) {
         this.value = value;
     }
 

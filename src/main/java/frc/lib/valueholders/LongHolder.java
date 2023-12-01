@@ -1,9 +1,9 @@
-package frc.lib.refvalues;
+package frc.lib.valueholders;
 
-public class LongRefValue {
+public class LongHolder {
     private long value;
 
-    public LongRefValue(long value) {
+    public LongHolder(long value) {
         this.value = value;
     }
 

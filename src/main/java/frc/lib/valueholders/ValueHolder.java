@@ -1,9 +1,9 @@
-package frc.lib.refvalues;
+package frc.lib.valueholders;
 
-public class RefValue<T> {
+public class ValueHolder<T> {
     private T value;
 
-    public RefValue(T value){
+    public ValueHolder(T value){
         this.value = value;
     }
 

@@ -28,7 +28,6 @@ public class LogFieldsTable implements LoggableInputs {
 
     private final String name;
     private final String prefix;
-    private final Logger logger = Logger.getInstance();
     private final List<LoggableInputs> fields = new ArrayList<>();
     private Runnable periodicBeforeFields = null;
 
@@ -45,10 +44,10 @@ public class LogFieldsTable implements LoggableInputs {
     }
 
     public void update() {
-        if (periodicBeforeFields != null && !Logger.getInstance().hasReplaySource()) {
+        if (periodicBeforeFields != null && !Logger.hasReplaySource()) {
             periodicBeforeFields.run();
         }
-        Logger.getInstance().processInputs(name, this);
+        Logger.processInputs(name, this);
     }
 
     public LogFieldsTable getSubTable(String name) {
@@ -82,7 +81,7 @@ public class LogFieldsTable implements LoggableInputs {
             String name,
             Supplier<byte[]> valueSupplier,
             byte[] defaultValue) {
-        return registerField(new LogField<>(name, valueSupplier, LogTable::getRaw, LogTable::put));
+        return registerField(new LogField<>(name, valueSupplier, LogTable::get, LogTable::put));
     }
 
     public Supplier<byte[]> addRaw(String name, Supplier<byte[]> valueSupplier) {
@@ -137,7 +136,7 @@ public class LogFieldsTable implements LoggableInputs {
             String name,
             Supplier<String> valueSupplier,
             String defaultValue) {
-        return registerField(new LogField<>(name, valueSupplier, LogTable::getString, LogTable::put));
+        return registerField(new LogField<>(name, valueSupplier, LogTable::get, LogTable::put));
     }
 
     public Supplier<String> addString(String name, Supplier<String> valueSupplier) {
@@ -148,7 +147,7 @@ public class LogFieldsTable implements LoggableInputs {
             String name,
             Supplier<boolean[]> valueSupplier,
             boolean[] defaultValue) {
-        return registerField(new LogField<>(name, valueSupplier, LogTable::getBooleanArray, LogTable::put));
+        return registerField(new LogField<>(name, valueSupplier, LogTable::get, LogTable::put));
     }
 
     public Supplier<boolean[]> addBooleanArray(String name, Supplier<boolean[]> valueSupplier) {
@@ -159,7 +158,7 @@ public class LogFieldsTable implements LoggableInputs {
             String name,
             Supplier<long[]> valueSupplier,
             long[] defaultValue) {
-        return registerField(new LogField<>(name, valueSupplier, LogTable::getIntegerArray, LogTable::put));
+        return registerField(new LogField<>(name, valueSupplier, LogTable::get, LogTable::put));
     }
 
     public Supplier<long[]> addIntegerArray(String name, Supplier<long[]> valueSupplier) {
@@ -170,7 +169,7 @@ public class LogFieldsTable implements LoggableInputs {
             String name,
             Supplier<float[]> valueSupplier,
             float[] defaultValue) {
-        return registerField(new LogField<>(name, valueSupplier, LogTable::getFloatArray, LogTable::put));
+        return registerField(new LogField<>(name, valueSupplier, LogTable::get, LogTable::put));
     }
 
     public Supplier<float[]> addFloatArray(String name, Supplier<float[]> valueSupplier) {
@@ -181,7 +180,7 @@ public class LogFieldsTable implements LoggableInputs {
             String name,
             Supplier<double[]> valueSupplier,
             double[] defaultValue) {
-        return registerField(new LogField<>(name, valueSupplier, LogTable::getDoubleArray, LogTable::put));
+        return registerField(new LogField<>(name, valueSupplier, LogTable::get, LogTable::put));
     }
 
     public Supplier<double[]> addDoubleArray(String name, Supplier<double[]> valueSupplier) {
@@ -192,7 +191,7 @@ public class LogFieldsTable implements LoggableInputs {
             String name,
             Supplier<String[]> valueSupplier,
             String[] defaultValue) {
-        return registerField(new LogField<>(name, valueSupplier, LogTable::getStringArray, LogTable::put));
+        return registerField(new LogField<>(name, valueSupplier, LogTable::get, LogTable::put));
     }
 
     public Supplier<String[]> addStringArray(String name, Supplier<String[]> valueSupplier) {
@@ -200,66 +199,66 @@ public class LogFieldsTable implements LoggableInputs {
     }
 
     public void recordOutput(String name, byte[] value) {
-        logger.recordOutput(prefix + name, value);
+        Logger.recordOutput(prefix + name, value);
     }
 
     public void recordOutput(String name, boolean value) {
-        logger.recordOutput(prefix + name, value);
+        Logger.recordOutput(prefix + name, value);
     }
 
     public void recordOutput(String name, long value) {
-        logger.recordOutput(prefix + name, value);
+        Logger.recordOutput(prefix + name, value);
     }
 
     public void recordOutput(String name, float value) {
-        logger.recordOutput(prefix + name, value);
+        Logger.recordOutput(prefix + name, value);
     }
 
     public void recordOutput(String name, double value) {
-        logger.recordOutput(prefix + name, value);
+        Logger.recordOutput(prefix + name, value);
     }
 
     public void recordOutput(String name, String value) {
-        logger.recordOutput(prefix + name, value);
+        Logger.recordOutput(prefix + name, value);
     }
 
     public void recordOutput(String name, boolean[] value) {
-        logger.recordOutput(prefix + name, value);
+        Logger.recordOutput(prefix + name, value);
     }
 
     public void recordOutput(String name, long[] value) {
-        logger.recordOutput(prefix + name, value);
+        Logger.recordOutput(prefix + name, value);
     }
 
     public void recordOutput(String name, float[] value) {
-        logger.recordOutput(prefix + name, value);
+        Logger.recordOutput(prefix + name, value);
     }
 
     public void recordOutput(String name, double[] value) {
-        logger.recordOutput(prefix + name, value);
+        Logger.recordOutput(prefix + name, value);
     }
 
     public void recordOutput(String name, String[] value) {
-        logger.recordOutput(prefix + name, value);
+        Logger.recordOutput(prefix + name, value);
     }
 
     public void recordOutput(String name, Pose2d... value) {
-        logger.recordOutput(prefix + name, value);
+        Logger.recordOutput(prefix + name, value);
     }
 
     public void recordOutput(String name, Pose3d... value) {
-        logger.recordOutput(prefix + name, value);
+        Logger.recordOutput(prefix + name, value);
     }
 
     public void recordOutput(String name, Trajectory value) {
-        logger.recordOutput(prefix + name, value);
+        Logger.recordOutput(prefix + name, value);
     }
 
     public void recordOutput(String name, SwerveModuleState... value) {
-        logger.recordOutput(prefix + name, value);
+        Logger.recordOutput(prefix + name, value);
     }
 
     public void recordOutput(String name, Mechanism2d value) {
-        logger.recordOutput(prefix + name, value);
+        Logger.recordOutput(prefix + name, value);
     }
 }
