@@ -3,6 +3,7 @@ package frc.lib.tuneables;
 import java.util.Set;
 import java.util.function.Function;
 
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
@@ -27,11 +28,6 @@ public class TuneableWrapperCommand extends TuneableCommand {
         this.tuneable = tuneable;
 
         setName(command.getName());
-    }
-
-    @Override
-    public Tuneable fullTuneable() {
-        return tuneable;
     }
 
     public void initialize() {
@@ -65,5 +61,10 @@ public class TuneableWrapperCommand extends TuneableCommand {
     @Override
     public void initTuneable(TuneableBuilder builder) {
         tuneable.initTuneable(builder);
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        command.initSendable(builder);
     }
 }
