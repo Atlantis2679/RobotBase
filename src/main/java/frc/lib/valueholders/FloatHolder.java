@@ -1,4 +1,4 @@
-package frc.lib.refvalues;
+package frc.lib.valueholders;
 
 public class FloatHolder {
     private float value;

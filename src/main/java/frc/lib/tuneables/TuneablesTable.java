@@ -12,9 +12,9 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.util.sendable.Sendable;
-import frc.lib.refvalues.BooleanHolder;
-import frc.lib.refvalues.DoubleHolder;
-import frc.lib.refvalues.ValueHolder;
+import frc.lib.valueholders.BooleanHolder;
+import frc.lib.valueholders.DoubleHolder;
+import frc.lib.valueholders.ValueHolder;
 
 public class TuneablesTable implements Tuneable {
     private final SendableType sendableType;
