@@ -78,7 +78,7 @@ public class Robot extends LoggedRobot {
             Logger.addDataReceiver(new NT4Publisher() {
                 @Override
                 public void putTable(LogTable table) {
-                    if (table.get("DriverStation/Test", false))
+                    if (table.get("RealOutputs/Tuning Mode", false))
                         super.putTable(table);
                 }
             });
@@ -105,6 +105,7 @@ public class Robot extends LoggedRobot {
         LogFieldsTable.updateAllTables();
         TuneablesManager.update();
         CommandScheduler.getInstance().run();
+        Logger.recordOutput("Tuning Mode", TuneablesManager.isEnabled());
     }
 
     @Override
