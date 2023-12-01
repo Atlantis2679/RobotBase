@@ -35,29 +35,21 @@ public class TuneableBuilder implements NTSendableBuilder {
         this.sendablePublisher = sendablePublisher;
     }
 
-    @Override
-    public void close() throws Exception {
-        baseBuilder.close();
-    }
-
-    @Override
-    public void setSmartDashboardType(String type) {
-        baseBuilder.setSmartDashboardType(type);
-    }
+    // ===================== new methods =====================
 
     public void setSendableType(SendableType sendableType) {
         setSmartDashboardType(sendableType.getStringType());
     }
 
-    @Override
-    public void setActuator(boolean value) {
-        baseBuilder.setActuator(value);
+    public void addChild(String name, Tuneable tuneable) {
+        TuneablesManager.add(this.key + "/" + name, tuneable, sendablePublisher);
     }
 
-    @Override
-    public void setSafeState(Runnable func) {
-        baseBuilder.setSafeState(func);
+    public void addChild(String name, Sendable sendable) {
+        TuneablesManager.add(this.key + "/" + name, sendable, sendablePublisher);
     }
+
+    // ===================== methods with no change =====================
 
     @Override
     public void addBooleanProperty(String key, BooleanSupplier getter, BooleanConsumer setter) {
@@ -95,7 +87,7 @@ public class TuneableBuilder implements NTSendableBuilder {
 
     @Override
     public void addBooleanArrayProperty(String key, Supplier<boolean[]> getter, Consumer<boolean[]> setter) {
-        baseBuilder.addBooleanProperty(key, null, null);
+        baseBuilder.addBooleanArrayProperty(key, getter, null);
     }
 
     @Override
@@ -121,6 +113,28 @@ public class TuneableBuilder implements NTSendableBuilder {
     @Override
     public void addRawProperty(String key, String typeString, Supplier<byte[]> getter, Consumer<byte[]> setter) {
         baseBuilder.addRawProperty(key, typeString, getter, null);
+    }
+
+    // ===================== methods with no change =====================
+
+    @Override
+    public void close() throws Exception {
+        baseBuilder.close();
+    }
+
+    @Override
+    public void setSmartDashboardType(String type) {
+        baseBuilder.setSmartDashboardType(type);
+    }
+
+    @Override
+    public void setActuator(boolean value) {
+        baseBuilder.setActuator(value);
+    }
+
+    @Override
+    public void setSafeState(Runnable func) {
+        baseBuilder.setSafeState(func);
     }
 
     @Override
@@ -163,11 +177,58 @@ public class TuneableBuilder implements NTSendableBuilder {
         return ((NTSendableBuilder) baseBuilder).getTable();
     }
 
-    public void addChild(String name, Tuneable tuneable) {
-        TuneablesManager.add(this.key + "/" + name, tuneable, sendablePublisher);
+    @Override
+    public void publishConstBoolean(String key, boolean value) {
+        baseBuilder.publishConstBoolean(key, value);
     }
 
-    public void addChild(String name, Sendable sendable) {
-        TuneablesManager.add(this.key + "/" + name, sendable, sendablePublisher);
+    @Override
+    public void publishConstInteger(String key, long value) {
+        baseBuilder.publishConstInteger(key, value);
+    }
+
+    @Override
+    public void publishConstFloat(String key, float value) {
+        baseBuilder.publishConstFloat(key, value);
+    }
+
+    @Override
+    public void publishConstDouble(String key, double value) {
+        baseBuilder.publishConstDouble(key, value);
+    }
+
+    @Override
+    public void publishConstString(String key, String value) {
+        baseBuilder.publishConstString(key, value);
+    }
+
+    @Override
+    public void publishConstBooleanArray(String key, boolean[] value) {
+        baseBuilder.publishConstBooleanArray(key, value);
+    }
+
+    @Override
+    public void publishConstIntegerArray(String key, long[] value) {
+        baseBuilder.publishConstIntegerArray(key, value);
+    }
+
+    @Override
+    public void publishConstFloatArray(String key, float[] value) {
+        baseBuilder.publishConstFloatArray(key, value);
+    }
+
+    @Override
+    public void publishConstDoubleArray(String key, double[] value) {
+        baseBuilder.publishConstDoubleArray(key, value);
+    }
+
+    @Override
+    public void publishConstStringArray(String key, String[] value) {
+        baseBuilder.publishConstStringArray(key, value);
+    }
+
+    @Override
+    public void publishConstRaw(String key, String typeString, byte[] value) {
+        baseBuilder.publishConstRaw(key, typeString, value);
     }
 }
