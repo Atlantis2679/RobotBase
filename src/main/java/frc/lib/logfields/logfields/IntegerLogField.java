@@ -32,6 +32,6 @@ public class IntegerLogField implements LongSupplier, LoggableInputs {
 
     @Override
     public void fromLog(LogTable table) {
-        value = table.getInteger(name, value);
+        value = table.get(name, value);
     }
 }

@@ -32,6 +32,6 @@ public class DoubleLogField implements DoubleSupplier, LoggableInputs {
 
     @Override
     public void fromLog(LogTable table) {
-        value = table.getDouble(name, value);
+        value = table.get(name, value);
     }
 }

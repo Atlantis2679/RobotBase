@@ -32,6 +32,6 @@ public class FloatLogField implements FloatSupplier, LoggableInputs {
 
     @Override
     public void fromLog(LogTable table) {
-        value = table.getFloat(name, value);
+        value = table.get(name, value);
     }
 }
