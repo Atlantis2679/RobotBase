@@ -58,6 +58,10 @@ public class TuneablesManager {
         }
     }
 
+    public static boolean isEnabled() {
+        return isEnabled;
+    }
+
     private static class TuneableItem {
         public final String key;
         public final Tuneable tuneable;
