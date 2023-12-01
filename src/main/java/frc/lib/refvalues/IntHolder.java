@@ -1,9 +1,9 @@
 package frc.lib.refvalues;
 
-public class IntRefValue {
+public class IntHolder {
     private int value;
 
-    public IntRefValue(int value) {
+    public IntHolder(int value) {
         this.value = value;
     }
 

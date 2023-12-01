@@ -1,9 +1,9 @@
 package frc.lib.refvalues;
 
-public class FloatRefValue {
+public class FloatHolder {
     private float value;
 
-    public FloatRefValue(float value) {
+    public FloatHolder(float value) {
         this.value = value;
     }
 
