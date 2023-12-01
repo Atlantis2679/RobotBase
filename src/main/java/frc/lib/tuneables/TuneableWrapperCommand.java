@@ -60,7 +60,6 @@ public class TuneableWrapperCommand extends TuneableCommand {
 
     @Override
     public void initTuneable(TuneableBuilder builder) {
-        System.out.println("yay");
         tuneable.initTuneable(builder);
     }
 
