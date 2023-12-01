@@ -1,5 +1,5 @@
 package frc.lib.tuneables;
 
 public interface Tuneable {
-    void initTuneable(TuneableBuilder tuneableBuilder);
+    void initTuneable(TuneableBuilder builder);
 }
