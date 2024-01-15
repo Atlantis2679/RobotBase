@@ -10,7 +10,7 @@ public abstract class TuneableCommand extends Command implements Tuneable {
         return (builder) -> {
             builder.setSendableType(SendableType.LIST);
             builder.addChild("run button", (Sendable) this);
-            builder.addChild("tuning", (Tuneable) this);
+            initTuneable(builder);
         };
     };
 

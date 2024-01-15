@@ -16,7 +16,6 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.logfields.LogFieldsTable;
@@ -65,8 +64,9 @@ public class Robot extends LoggedRobot {
                 Logger.recordMetadata("GitDirty", "Unknown");
                 break;
         }
-        
+
         if (getIsReplay()) {
+            System.out.println("******************* Starting replay mode! *******************");
             setUseTiming(false);
             String logPath = LogFileUtil.findReplayLog();
             Logger.setReplaySource(new WPILOGReader(logPath));
@@ -82,7 +82,7 @@ public class Robot extends LoggedRobot {
                         super.putTable(table);
                 }
             });
-            LoggedPowerDistribution.getInstance(0, ModuleType.kCTRE);
+            LoggedPowerDistribution.getInstance(0, RobotMap.POWER_DISTRIBUATION_TYPE);
         }
 
         Logger.start();
@@ -142,13 +142,17 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void testInit() {
+        CommandScheduler.getInstance().disable();
         TuneablesManager.enable();
-        teleopInit();
     }
 
     @Override
     public void testPeriodic() {
-        teleopPeriodic();
+    }
+
+    @Override
+    public void testExit() {
+        CommandScheduler.getInstance().enable();
     }
 
     @Override
