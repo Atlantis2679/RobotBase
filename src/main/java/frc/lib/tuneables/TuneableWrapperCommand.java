@@ -20,7 +20,7 @@ public class TuneableWrapperCommand extends TuneableCommand {
     }
 
     public TuneableWrapperCommand(Function<TuneablesTable, Command> commandFactory) {
-        this(commandFactory, SendableType.LIST);
+        this(commandFactory, SendableType.NONE);
     }
 
     public TuneableWrapperCommand(Command command, Tuneable tuneable) {
