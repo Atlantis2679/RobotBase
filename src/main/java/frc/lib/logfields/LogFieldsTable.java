@@ -11,12 +11,9 @@ import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.util.WPISerializable;
 import edu.wpi.first.util.function.FloatSupplier;
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.util.struct.StructSerializable;
 import frc.lib.logfields.logfields.BooleanLogField;
 import frc.lib.logfields.logfields.DoubleLogField;
 import frc.lib.logfields.logfields.FloatLogField;
@@ -198,6 +195,30 @@ public class LogFieldsTable implements LoggableInputs {
         return addStringArray(name, valueSupplier, new String[] {});
     }
 
+    public <T extends WPISerializable> Supplier<T> addObject(
+            String name,
+            Supplier<T> valueSupplier,
+            String[] defaultValue) {
+        return registerField(new LogField<>(name, valueSupplier, LogTable::get, LogTable::put));
+    }
+
+    public <T extends WPISerializable> Supplier<T> addObject(String name, Supplier<T> valueSupplier) {
+        return addObject(name, valueSupplier, new String[] {});
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends StructSerializable> Supplier<T[]> addObjectArray(
+            String name,
+            Supplier<T[]> valueSupplier,
+            String[] defaultValue) {
+        return registerField(new LogField<>(name, valueSupplier, LogTable::get, LogTable::put));
+    }
+
+    // @SuppressWarnings("unchecked")
+    public <T extends StructSerializable> Supplier<T[]> addObjectArray(String name, Supplier<T[]> valueSupplier) {
+        return addObjectArray(name, valueSupplier, new String[] {});
+    }
+
     public void recordOutput(String name, byte[] value) {
         Logger.recordOutput(prefix + name, value);
     }
@@ -242,23 +263,11 @@ public class LogFieldsTable implements LoggableInputs {
         Logger.recordOutput(prefix + name, value);
     }
 
-    public void recordOutput(String name, Pose2d... value) {
+    public void recordOutput(String name, WPISerializable value) {
         Logger.recordOutput(prefix + name, value);
     }
 
-    public void recordOutput(String name, Pose3d... value) {
-        Logger.recordOutput(prefix + name, value);
-    }
-
-    public void recordOutput(String name, Trajectory value) {
-        Logger.recordOutput(prefix + name, value);
-    }
-
-    public void recordOutput(String name, SwerveModuleState... value) {
-        Logger.recordOutput(prefix + name, value);
-    }
-
-    public void recordOutput(String name, Mechanism2d value) {
+    public void recordOutput(String name, StructSerializable... value) {
         Logger.recordOutput(prefix + name, value);
     }
 }
