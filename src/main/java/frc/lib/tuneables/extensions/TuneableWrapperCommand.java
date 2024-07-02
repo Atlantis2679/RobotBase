@@ -1,4 +1,4 @@
-package frc.lib.tuneables;
+package frc.lib.tuneables.extensions;
 
 import java.util.Set;
 import java.util.function.Function;
@@ -6,6 +6,10 @@ import java.util.function.Function;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.lib.tuneables.SendableType;
+import frc.lib.tuneables.Tuneable;
+import frc.lib.tuneables.TuneableBuilder;
+import frc.lib.tuneables.TuneablesTable;
 
 public class TuneableWrapperCommand extends TuneableCommand {
     private final Command command;

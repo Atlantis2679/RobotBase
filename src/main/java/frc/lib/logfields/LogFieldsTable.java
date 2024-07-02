@@ -14,6 +14,7 @@ import org.littletonrobotics.junction.inputs.LoggableInputs;
 import edu.wpi.first.util.WPISerializable;
 import edu.wpi.first.util.function.FloatSupplier;
 import edu.wpi.first.util.struct.StructSerializable;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import frc.lib.logfields.logfields.BooleanLogField;
 import frc.lib.logfields.logfields.DoubleLogField;
 import frc.lib.logfields.logfields.FloatLogField;
@@ -263,11 +264,16 @@ public class LogFieldsTable implements LoggableInputs {
         Logger.recordOutput(prefix + name, value);
     }
 
-    public void recordOutput(String name, WPISerializable value) {
+    public <T extends WPISerializable> void recordOutput(String name, T value) {
         Logger.recordOutput(prefix + name, value);
     }
 
-    public void recordOutput(String name, StructSerializable... value) {
+    @SuppressWarnings("unchecked")
+    public <T extends StructSerializable> void recordOutput(String name, T... value) {
+        Logger.recordOutput(prefix + name, value);
+    }
+
+    public void recordOutput(String name, Mechanism2d value) {
         Logger.recordOutput(prefix + name, value);
     }
 }
