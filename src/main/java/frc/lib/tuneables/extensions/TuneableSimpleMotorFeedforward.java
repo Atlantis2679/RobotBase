@@ -39,15 +39,15 @@ public class TuneableSimpleMotorFeedforward implements Tuneable {
     }
 
     public void setKS(double newKS) {
-        baseFeedforward = new SimpleMotorFeedforward(newKS, baseFeedforward.kv, baseFeedforward.ka);
+        baseFeedforward = new SimpleMotorFeedforward(newKS, baseFeedforward.getKv(), baseFeedforward.getKa());
     }
 
     public void setKV(double newKV) {
-        baseFeedforward = new SimpleMotorFeedforward(baseFeedforward.ks, newKV, baseFeedforward.ka);
+        baseFeedforward = new SimpleMotorFeedforward(baseFeedforward.getKs(), newKV, baseFeedforward.getKa());
     }
 
     public void setKA(double newKA) {
-        baseFeedforward = new SimpleMotorFeedforward(baseFeedforward.ks, baseFeedforward.kv, newKA);
+        baseFeedforward = new SimpleMotorFeedforward(baseFeedforward.getKs(), baseFeedforward.getKa(), newKA);
     }
 
     public SimpleMotorFeedforward getArmFeedforward() {
@@ -57,9 +57,8 @@ public class TuneableSimpleMotorFeedforward implements Tuneable {
     @Override
     public void initTuneable(TuneableBuilder builder) {
         builder.setSendableType(SendableType.LIST);
-        builder.addDoubleProperty("kS", () -> baseFeedforward.ks, this::setKS);
-        builder.addDoubleProperty("kV", () -> baseFeedforward.kv, this::setKV);
-        builder.addDoubleProperty("kA", () -> baseFeedforward.ka, this::setKA);
+        builder.addDoubleProperty("kS", baseFeedforward::getKs, this::setKS);
+        builder.addDoubleProperty("kV", baseFeedforward::getKv, this::setKV);
+        builder.addDoubleProperty("kA", baseFeedforward::getKa, this::setKA);
     }
-
 }
