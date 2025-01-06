@@ -44,19 +44,19 @@ public class TuneableArmFeedforward implements Tuneable {
     }
 
     public void setKS(double value) {
-        armFeedforward = new ArmFeedforward(value, armFeedforward.kg, armFeedforward.kv, armFeedforward.ka);
+        armFeedforward = new ArmFeedforward(value, armFeedforward.getKg(), armFeedforward.getKv(), armFeedforward.getKa());
     }
 
     public void setKG(double value) {
-        armFeedforward = new ArmFeedforward(armFeedforward.ks, value, armFeedforward.kv, armFeedforward.ka);
+        armFeedforward = new ArmFeedforward(armFeedforward.getKs(), value, armFeedforward.getKv(), armFeedforward.getKa());
     }
 
     public void setKV(double value) {
-        armFeedforward = new ArmFeedforward(armFeedforward.ks, armFeedforward.kg, value, armFeedforward.ka);
+        armFeedforward = new ArmFeedforward(armFeedforward.getKs(), armFeedforward.getKg(), value, armFeedforward.getKa());
     }
 
     public void setKA(double value) {
-        armFeedforward = new ArmFeedforward(armFeedforward.ks, armFeedforward.kg, armFeedforward.kv, value);
+        armFeedforward = new ArmFeedforward(armFeedforward.getKs(), armFeedforward.getKg(), armFeedforward.getKv(), value);
     }
 
     public ArmFeedforward getArmFeedforward() {
@@ -66,10 +66,10 @@ public class TuneableArmFeedforward implements Tuneable {
     @Override
     public void initTuneable(TuneableBuilder builder) {
         builder.setSendableType(SendableType.LIST);
-        builder.addDoubleProperty("kS", () -> armFeedforward.ks, this::setKS);
-        builder.addDoubleProperty("kG", () -> armFeedforward.kg, this::setKG);
-        builder.addDoubleProperty("kV", () -> armFeedforward.kv, this::setKV);
-        builder.addDoubleProperty("kA", () -> armFeedforward.ka, this::setKA);
+        builder.addDoubleProperty("kS", armFeedforward::getKs, this::setKS);
+        builder.addDoubleProperty("kG", armFeedforward::getKg, this::setKG);
+        builder.addDoubleProperty("kV", armFeedforward::getKv, this::setKV);
+        builder.addDoubleProperty("kA", armFeedforward::getKa, this::setKA);
     }
 
 }
