@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.logfields.LogFieldsTable;
-import frc.lib.tuneables.TuneablesManager;
+import frc.lib.tunables.TunablesManager;
 
 public class Robot extends LoggedRobot {
     private Command autonomousCommand;
@@ -103,9 +103,9 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotPeriodic() {
         LogFieldsTable.updateAllTables();
-        TuneablesManager.update();
+        TunablesManager.update();
         CommandScheduler.getInstance().run();
-        Logger.recordOutput("Tuning Mode", TuneablesManager.isEnabled());
+        Logger.recordOutput("Tuning Mode", TunablesManager.isEnabled());
     }
 
     @Override
@@ -143,7 +143,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void testInit() {
         CommandScheduler.getInstance().disable();
-        TuneablesManager.enable();
+        TunablesManager.enable();
     }
 
     @Override

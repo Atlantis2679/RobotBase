@@ -1,4 +1,4 @@
-package frc.lib.tuneables.sendableproperties;
+package frc.lib.tunables.sendableproperties;
 
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
@@ -7,12 +7,12 @@ import java.util.function.Supplier;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import frc.lib.logfields.LogFieldsTable;
 
-public class NumberTuneableProperty extends TuneableProperty {
+public class NumberTunableProperty extends TunableProperty {
     private final Supplier<double[]> field;
     private double[] valueFromNetwork = {};
     private final DoubleConsumer setter;
 
-    public NumberTuneableProperty(
+    public NumberTunableProperty(
             String key,
             DoubleSupplier getter,
             DoubleConsumer setter,

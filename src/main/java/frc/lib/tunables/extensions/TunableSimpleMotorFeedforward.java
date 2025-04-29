@@ -1,14 +1,14 @@
-package frc.lib.tuneables.extensions;
+package frc.lib.tunables.extensions;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import frc.lib.tuneables.SendableType;
-import frc.lib.tuneables.Tuneable;
-import frc.lib.tuneables.TuneableBuilder;
+import frc.lib.tunables.SendableType;
+import frc.lib.tunables.Tunable;
+import frc.lib.tunables.TunableBuilder;
 
-public class TuneableSimpleMotorFeedforward implements Tuneable {
+public class TunableSimpleMotorFeedforward implements Tunable {
     private SimpleMotorFeedforward baseFeedforward;
 
-    public TuneableSimpleMotorFeedforward(double ks, double kv, double ka) {
+    public TunableSimpleMotorFeedforward(double ks, double kv, double ka) {
         baseFeedforward = new SimpleMotorFeedforward(ks, kv, ka);
     }
 
@@ -55,7 +55,7 @@ public class TuneableSimpleMotorFeedforward implements Tuneable {
     }
 
     @Override
-    public void initTuneable(TuneableBuilder builder) {
+    public void initTunable(TunableBuilder builder) {
         builder.setSendableType(SendableType.LIST);
         builder.addDoubleProperty("kS", baseFeedforward::getKs, this::setKS);
         builder.addDoubleProperty("kV", baseFeedforward::getKv, this::setKV);

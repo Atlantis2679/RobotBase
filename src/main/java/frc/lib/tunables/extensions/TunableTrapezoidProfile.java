@@ -1,16 +1,16 @@
-package frc.lib.tuneables.extensions;
+package frc.lib.tunables.extensions;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
-import frc.lib.tuneables.Tuneable;
-import frc.lib.tuneables.TuneableBuilder;
+import frc.lib.tunables.Tunable;
+import frc.lib.tunables.TunableBuilder;
 
-public class TuneableTrapezoidProfile implements Tuneable {
+public class TunableTrapezoidProfile implements Tunable {
     private TrapezoidProfile trapezoidProfile;
     private Constraints constraints;
 
-    public TuneableTrapezoidProfile(Constraints constraints) {
+    public TunableTrapezoidProfile(Constraints constraints) {
         this.constraints = constraints;
         trapezoidProfile = new TrapezoidProfile(constraints);
     }
@@ -54,7 +54,7 @@ public class TuneableTrapezoidProfile implements Tuneable {
     }
 
     @Override
-    public void initTuneable(TuneableBuilder builder) {
+    public void initTunable(TunableBuilder builder) {
         builder.addDoubleProperty("Max Velocity", this::getMaxVelocity, this::setMaxVelocity);
         builder.addDoubleProperty("Max Acceleration", this::getMaxAcceleration, this::setMaxAcceleration);
     }

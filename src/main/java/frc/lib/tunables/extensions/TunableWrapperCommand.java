@@ -1,4 +1,4 @@
-package frc.lib.tuneables.extensions;
+package frc.lib.tunables.extensions;
 
 import java.util.Set;
 import java.util.function.Function;
@@ -6,30 +6,30 @@ import java.util.function.Function;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.lib.tuneables.SendableType;
-import frc.lib.tuneables.Tuneable;
-import frc.lib.tuneables.TuneableBuilder;
-import frc.lib.tuneables.TuneablesTable;
+import frc.lib.tunables.SendableType;
+import frc.lib.tunables.Tunable;
+import frc.lib.tunables.TunableBuilder;
+import frc.lib.tunables.TunablesTable;
 
-public class TuneableWrapperCommand extends TuneableCommand {
+public class TunableWrapperCommand extends TunableCommand {
     private final Command command;
-    private final Tuneable tuneable;
+    private final Tunable tunable;
 
-    public TuneableWrapperCommand(Function<TuneablesTable, Command> commandFactory, SendableType sendableType) {
-        TuneablesTable tuneablesTable = new TuneablesTable(sendableType);
-        this.command = commandFactory.apply(tuneablesTable);
-        this.tuneable = tuneablesTable;
+    public TunableWrapperCommand(Function<TunablesTable, Command> commandFactory, SendableType sendableType) {
+        TunablesTable tunablesTable = new TunablesTable(sendableType);
+        this.command = commandFactory.apply(tunablesTable);
+        this.tunable = tunablesTable;
 
         setName(command.getName());
     }
 
-    public TuneableWrapperCommand(Function<TuneablesTable, Command> commandFactory) {
+    public TunableWrapperCommand(Function<TunablesTable, Command> commandFactory) {
         this(commandFactory, SendableType.NONE);
     }
 
-    public TuneableWrapperCommand(Command command, Tuneable tuneable) {
+    public TunableWrapperCommand(Command command, Tunable tunable) {
         this.command = command;
-        this.tuneable = tuneable;
+        this.tunable = tunable;
 
         setName(command.getName());
     }
@@ -63,8 +63,8 @@ public class TuneableWrapperCommand extends TuneableCommand {
     }
 
     @Override
-    public void initTuneable(TuneableBuilder builder) {
-        tuneable.initTuneable(builder);
+    public void initTunable(TunableBuilder builder) {
+        tunable.initTunable(builder);
     }
 
     @Override
