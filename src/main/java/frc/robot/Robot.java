@@ -10,7 +10,6 @@ import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.inputs.LoggedPowerDistribution;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
@@ -82,7 +81,6 @@ public class Robot extends LoggedRobot {
                         super.putTable(table);
                 }
             });
-            LoggedPowerDistribution.getInstance(0, RobotMap.POWER_DISTRIBUATION_TYPE);
         }
 
         Logger.start();
@@ -96,7 +94,6 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotInit() {
         initializeAdvantageKit();
-        enableLiveWindowInTest(false);
         robotContainer = new RobotContainer();
     }
 
