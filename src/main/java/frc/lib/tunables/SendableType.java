@@ -1,4 +1,4 @@
-package frc.lib.tuneables;
+package frc.lib.tunables;
 
 public enum SendableType {
     NONE(null),

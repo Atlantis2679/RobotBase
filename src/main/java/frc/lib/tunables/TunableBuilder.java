@@ -1,4 +1,4 @@
-package frc.lib.tuneables;
+package frc.lib.tunables;
 
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
@@ -18,20 +18,20 @@ import edu.wpi.first.util.function.FloatSupplier;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import frc.lib.logfields.LogFieldsTable;
-import frc.lib.tuneables.sendableproperties.BooleanTuneableProperty;
-import frc.lib.tuneables.sendableproperties.NumberTuneableProperty;
-import frc.lib.tuneables.sendableproperties.StringTuneableProperty;
+import frc.lib.tunables.sendableproperties.BooleanTunableProperty;
+import frc.lib.tunables.sendableproperties.NumberTunableProperty;
+import frc.lib.tunables.sendableproperties.StringTunableProperty;
 
-public class TuneableBuilder implements NTSendableBuilder {
+public class TunableBuilder implements NTSendableBuilder {
     private final SendableBuilder baseBuilder;
     private final LogFieldsTable fieldsTable;
     private final BiConsumer<String, Sendable> sendablePublisher;
     private final String key;
 
-    public TuneableBuilder(SendableBuilder baseBuilder, String key, BiConsumer<String, Sendable> sendablePublisher) {
+    public TunableBuilder(SendableBuilder baseBuilder, String key, BiConsumer<String, Sendable> sendablePublisher) {
         this.baseBuilder = baseBuilder;
         this.key = key;
-        this.fieldsTable = new LogFieldsTable("Tuneables/" + key);
+        this.fieldsTable = new LogFieldsTable("Tunables/" + key);
         this.sendablePublisher = sendablePublisher;
     }
 
@@ -41,12 +41,12 @@ public class TuneableBuilder implements NTSendableBuilder {
         setSmartDashboardType(sendableType.getStringType());
     }
 
-    public void addChild(String name, Tuneable tuneable) {
-        TuneablesManager.add(this.key + "/" + name, tuneable, sendablePublisher);
+    public void addChild(String name, Tunable tunable) {
+        TunablesManager.add(this.key + "/" + name, tunable, sendablePublisher);
     }
 
     public void addChild(String name, Sendable sendable) {
-        TuneablesManager.add(this.key + "/" + name, sendable, sendablePublisher);
+        TunablesManager.add(this.key + "/" + name, sendable, sendablePublisher);
     }
 
     // ===================== methods with no change =====================
@@ -54,7 +54,7 @@ public class TuneableBuilder implements NTSendableBuilder {
     @Override
     public void addBooleanProperty(String key, BooleanSupplier getter, BooleanConsumer setter) {
         if (setter != null)
-            new BooleanTuneableProperty(key, getter, setter, fieldsTable, baseBuilder);
+            new BooleanTunableProperty(key, getter, setter, fieldsTable, baseBuilder);
         else
             baseBuilder.addBooleanProperty(key, getter, setter);
     }
@@ -72,7 +72,7 @@ public class TuneableBuilder implements NTSendableBuilder {
     @Override
     public void addDoubleProperty(String key, DoubleSupplier getter, DoubleConsumer setter) {
         if (setter != null)
-            new NumberTuneableProperty(key, getter, setter, fieldsTable, baseBuilder);
+            new NumberTunableProperty(key, getter, setter, fieldsTable, baseBuilder);
         else
             baseBuilder.addDoubleProperty(key, getter, setter);
     }
@@ -80,7 +80,7 @@ public class TuneableBuilder implements NTSendableBuilder {
     @Override
     public void addStringProperty(String key, Supplier<String> getter, Consumer<String> setter) {
         if (setter != null)
-            new StringTuneableProperty(key, getter, setter, fieldsTable, baseBuilder);
+            new StringTunableProperty(key, getter, setter, fieldsTable, baseBuilder);
         else
             baseBuilder.addStringProperty(key, getter, setter);
     }

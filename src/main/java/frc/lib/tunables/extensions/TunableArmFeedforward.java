@@ -1,18 +1,18 @@
-package frc.lib.tuneables.extensions;
+package frc.lib.tunables.extensions;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
-import frc.lib.tuneables.SendableType;
-import frc.lib.tuneables.Tuneable;
-import frc.lib.tuneables.TuneableBuilder;
+import frc.lib.tunables.SendableType;
+import frc.lib.tunables.Tunable;
+import frc.lib.tunables.TunableBuilder;
 
-public class TuneableArmFeedforward implements Tuneable {
+public class TunableArmFeedforward implements Tunable {
     private ArmFeedforward armFeedforward;
 
-    public TuneableArmFeedforward(double ks, double kg, double kv) {
+    public TunableArmFeedforward(double ks, double kg, double kv) {
         armFeedforward = new ArmFeedforward(ks, kg, kv);
     }
 
-    public TuneableArmFeedforward(double ks, double kg, double kv, double ka) {
+    public TunableArmFeedforward(double ks, double kg, double kv, double ka) {
         armFeedforward = new ArmFeedforward(ks, kg, kv, ka);
     }
 
@@ -64,7 +64,7 @@ public class TuneableArmFeedforward implements Tuneable {
     }
 
     @Override
-    public void initTuneable(TuneableBuilder builder) {
+    public void initTunable(TunableBuilder builder) {
         builder.setSendableType(SendableType.LIST);
         builder.addDoubleProperty("kS", armFeedforward::getKs, this::setKS);
         builder.addDoubleProperty("kG", armFeedforward::getKg, this::setKG);

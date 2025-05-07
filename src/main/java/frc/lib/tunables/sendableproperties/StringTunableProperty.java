@@ -1,4 +1,4 @@
-package frc.lib.tuneables.sendableproperties;
+package frc.lib.tunables.sendableproperties;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -6,12 +6,12 @@ import java.util.function.Supplier;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import frc.lib.logfields.LogFieldsTable;
 
-public class StringTuneableProperty extends TuneableProperty {
+public class StringTunableProperty extends TunableProperty {
     private final Supplier<String[]> field;
     private String[] valueFromNetwork = {};
     private final Consumer<String> setter;
 
-    public StringTuneableProperty(
+    public StringTunableProperty(
             String key,
             Supplier<String> getter,
             Consumer<String> setter,

@@ -10,7 +10,6 @@ import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.inputs.LoggedPowerDistribution;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
@@ -19,7 +18,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.logfields.LogFieldsTable;
-import frc.lib.tuneables.TuneablesManager;
+import frc.lib.tunables.TunablesManager;
 
 public class Robot extends LoggedRobot {
     private Command autonomousCommand;
@@ -82,7 +81,6 @@ public class Robot extends LoggedRobot {
                         super.putTable(table);
                 }
             });
-            LoggedPowerDistribution.getInstance(0, RobotMap.POWER_DISTRIBUATION_TYPE);
         }
 
         Logger.start();
@@ -96,16 +94,15 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotInit() {
         initializeAdvantageKit();
-        enableLiveWindowInTest(false);
         robotContainer = new RobotContainer();
     }
 
     @Override
     public void robotPeriodic() {
         LogFieldsTable.updateAllTables();
-        TuneablesManager.update();
+        TunablesManager.update();
         CommandScheduler.getInstance().run();
-        Logger.recordOutput("Tuning Mode", TuneablesManager.isEnabled());
+        Logger.recordOutput("Tuning Mode", TunablesManager.isEnabled());
     }
 
     @Override
@@ -143,7 +140,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void testInit() {
         CommandScheduler.getInstance().disable();
-        TuneablesManager.enable();
+        TunablesManager.enable();
     }
 
     @Override

@@ -1,4 +1,4 @@
-package frc.lib.tuneables;
+package frc.lib.tunables;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,25 +16,25 @@ import frc.lib.valueholders.BooleanHolder;
 import frc.lib.valueholders.DoubleHolder;
 import frc.lib.valueholders.ValueHolder;
 
-public class TuneablesTable implements Tuneable {
+public class TunablesTable implements Tunable {
     private final SendableType sendableType;
     private final List<PropertyNode> propertyNodes = new ArrayList<>();
-    private final Map<String, Tuneable> tuneablesNode = new HashMap<>();
+    private final Map<String, Tunable> tunablesNode = new HashMap<>();
 
     private interface PropertyNode {
-        void addToBuilder(TuneableBuilder tuneableBuilder);
+        void addToBuilder(TunableBuilder tunableBuilder);
     }
 
-    public TuneablesTable(SendableType sendableType) {
+    public TunablesTable(SendableType sendableType) {
         this.sendableType = sendableType;
     }
 
-    public void addChild(String name, Tuneable tuneable) {
-        tuneablesNode.put(name, tuneable);
+    public void addChild(String name, Tunable tunable) {
+        tunablesNode.put(name, tunable);
     }
 
     public void addChild(String name, Sendable sendable) {
-        tuneablesNode.put(name, sendable::initSendable);
+        tunablesNode.put(name, sendable::initSendable);
     }
 
     public void addBoolean(String key, BooleanSupplier getter, BooleanConsumer setter) {
@@ -68,7 +68,7 @@ public class TuneablesTable implements Tuneable {
     }
 
     @Override
-    public void initTuneable(TuneableBuilder builder) {
+    public void initTunable(TunableBuilder builder) {
         if (sendableType != SendableType.NONE) {
             builder.setSmartDashboardType(sendableType.getStringType());
         }
@@ -77,8 +77,8 @@ public class TuneablesTable implements Tuneable {
             propertyNode.addToBuilder(builder);
         }
 
-        tuneablesNode.forEach((name, tuneable) -> {
-            builder.addChild(name, tuneable);
+        tunablesNode.forEach((name, tunable) -> {
+            builder.addChild(name, tunable);
         });
     }
 }
