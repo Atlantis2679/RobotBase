@@ -2,7 +2,6 @@ package frc.lib.networkalerts;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BooleanSupplier;
 
 public class NetworkAlertsManager {
     private static final List<NetworkPeriodicAlert> alerts = new ArrayList<>();
@@ -14,8 +13,7 @@ public class NetworkAlertsManager {
         }
     }
 
-    public static BooleanSupplier addNetworkPeriodicAlert(NetworkPeriodicAlert periodicAlert) {
+    public static void addNetworkPeriodicAlert(NetworkPeriodicAlert periodicAlert) {
         alerts.add(periodicAlert);
-        return periodicAlert::getIsActive;
     }
 }

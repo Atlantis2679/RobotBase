@@ -19,7 +19,8 @@ public class NetworkAlertsGroup {
 
     public BooleanSupplier addAlert(Supplier<String> message, BooleanSupplier isActive, AlertType alertType) {
         NetworkPeriodicAlert periodicAlert = new NetworkPeriodicAlert(this, message, isActive, alertType);
-        return NetworkAlertsManager.addNetworkPeriodicAlert(periodicAlert);
+        NetworkAlertsManager.addNetworkPeriodicAlert(periodicAlert);
+        return isActive;
     }
 
     public BooleanSupplier addInfoAlert(Supplier<String> message, BooleanSupplier isActive) {

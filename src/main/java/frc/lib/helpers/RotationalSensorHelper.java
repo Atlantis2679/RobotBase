@@ -53,7 +53,7 @@ public class RotationalSensorHelper implements Tunable {
         setOffset(measuredAngle - newAngle);
     }
 
-    public void enableContinousWrap(double lowerBound, double upperBound) {
+    public void enableContinuousWrap(double lowerBound, double upperBound) {
         continousWrapEnabled = true;
         continousWrapLowerBound = lowerBound;
         this.fullRotation = upperBound - lowerBound;
