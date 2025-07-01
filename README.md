@@ -1,3 +1,4 @@
 # RobotBase
-This is a base code for a command-based robot. It includes [AdvantageKit](https://github.com/Mechanical-Advantage/AdvantageKit), and our team lib.
-To read more about our lib, go to [AtlantisLib Wiki](https://github.com/Atlantis2679/AtlantisLib/wiki).
+This is a base code for a command-based robot. To use it, include [AdvantageKit](https://github.com/Mechanical-Advantage/AdvantageKit),
+and our library [AtlantisLib](https://github.com/Atlantis2679/AtlantisKit) in vendordpes.
+To read more about our lib, go to [AtlantisKit Wiki](https://github.com/Atlantis2679/AtlantisKit/wiki).
