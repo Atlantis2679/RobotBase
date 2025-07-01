@@ -27,7 +27,7 @@ pluginManagement {
 }
 
 // Uncomment this line to import the library locally (so you can edit it):
-// includeBuild "../AtlantisLib"
+// includeBuild "../AtlantisKit"
 
 Properties props = System.getProperties();
 props.setProperty("org.gradle.internal.native.headers.unresolved.dependencies.ignore", "true");
