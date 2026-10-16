@@ -13,17 +13,18 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
-
-import team2679.atlantiskit.logfields.LogFieldsTable;
-import team2679.atlantiskit.periodicalerts.PeriodicAlertsManager;
-import team2679.atlantiskit.tunables.TunablesManager;
-import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.wpilib.command3.Command;
+import org.wpilib.command3.Scheduler;
+import org.wpilib.system.Filesystem;
 
 public class Robot extends LoggedRobot {
     private Command autonomousCommand;
     private RobotContainer robotContainer;
+
+    public Robot() {
+        initializeAdvantageKit();
+        robotContainer = new RobotContainer();
+    }
 
     private String getLogPath() {
         if (isReal()) {
@@ -87,24 +88,17 @@ public class Robot extends LoggedRobot {
         Logger.start();
     }
 
-    // in a method to avoid unreachable code warning.
     private boolean getIsReplay() {
         return isSimulation() && Constants.REPLAY;
     }
 
     @Override
-    public void robotInit() {
-        initializeAdvantageKit();
-        robotContainer = new RobotContainer();
+    public void driverStationConnected() {
     }
 
     @Override
     public void robotPeriodic() {
-        LogFieldsTable.updateAllTables();
-        TunablesManager.update();
-        PeriodicAlertsManager.update();
-        CommandScheduler.getInstance().run();
-        Logger.recordOutput("Tuning Mode", TunablesManager.isEnabled());
+        Scheduler.getDefault().run();
     }
 
     @Override
@@ -118,10 +112,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void autonomousInit() {
         autonomousCommand = robotContainer.getAutonomousCommand();
-
-        if (autonomousCommand != null) {
-            autonomousCommand.schedule();
-        }
+        Scheduler.getDefault().schedule(autonomousCommand);
     }
 
     @Override
@@ -129,10 +120,12 @@ public class Robot extends LoggedRobot {
     }
 
     @Override
+    public void autonomousExit() {
+        Scheduler.getDefault().cancel(autonomousCommand);
+    }
+
+    @Override
     public void teleopInit() {
-        if (autonomousCommand != null) {
-            autonomousCommand.cancel();
-        }
     }
 
     @Override
@@ -140,18 +133,15 @@ public class Robot extends LoggedRobot {
     }
 
     @Override
-    public void testInit() {
-        CommandScheduler.getInstance().disable();
-        TunablesManager.enable();
+    public void utilityInit() {
     }
 
     @Override
-    public void testPeriodic() {
+    public void utilityPeriodic() {
     }
 
     @Override
-    public void testExit() {
-        CommandScheduler.getInstance().enable();
+    public void utilityExit() {
     }
 
     @Override
