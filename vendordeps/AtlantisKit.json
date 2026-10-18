@@ -1,0 +1,21 @@
+{
+    "fileName": "AtlantisKit.json",
+    "name": "AtlantisKit",
+    "version": "5.0.2-alpha7",
+    "uuid": "b8d0be2a-8da7-4112-8b92-179389b4abe0",
+    "wpilibYear": "2027_alpha7",
+    "mavenUrls": [
+        "https://jitpack.io"
+    ],
+    "jsonUrl": "https://atlantis2679.github.io/AtlantisKit/AtlantisKit.json",
+    "javaDependencies": [
+        {
+            "groupId": "com.github.Atlantis2679",
+            "artifactId": "AtlantisKit",
+            "version": "v5.0.2-alpha7"
+        }
+    ],
+    "jniDependencies": [],
+    "nativeDependencies": [],
+    "cppDependencies": []
+}

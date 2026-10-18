@@ -14,7 +14,11 @@ public class RobotContainer {
     private void configureBindings() {
     }
 
-    public Optional<Alliance> getAlliance() {
+    public static boolean isRedAlliance() {
+        return getAlliance().isPresent() && getAlliance().get() == Alliance.RED;
+    }
+
+    public static Optional<Alliance> getAlliance() {
         return MatchState.getAlliance();
     }
 

@@ -17,6 +17,9 @@ import org.wpilib.command3.Command;
 import org.wpilib.command3.Scheduler;
 import org.wpilib.system.Filesystem;
 
+import team2679.atlantiskit.logfields.LogFieldsTable;
+import team2679.atlantiskit.periodicalerts.PeriodicAlertsManager;
+
 public class Robot extends LoggedRobot {
     private Command autonomousCommand;
     private RobotContainer robotContainer;
@@ -98,6 +101,8 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotPeriodic() {
+        LogFieldsTable.updateAllTables();
+        PeriodicAlertsManager.update();
         Scheduler.getDefault().run();
     }
 

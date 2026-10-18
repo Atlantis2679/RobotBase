@@ -3,6 +3,7 @@ package frc.robot.utils;
 import java.util.Arrays;
 
 import org.wpilib.tunable.ComplexTunable;
+import org.wpilib.tunable.TunableDouble;
 import org.wpilib.tunable.TunableTable;
 
 public class MathUtils {
@@ -39,6 +40,39 @@ public class MathUtils {
         }
     }
 
+    public static class Bounds implements ComplexTunable {
+        public final TunableDouble lowerBound;
+        public final TunableDouble upperBound;
+
+        public Bounds(TunableDouble lowerBound, TunableDouble upperBound) {
+            this.lowerBound = lowerBound;
+            this.upperBound = upperBound;
+        }
+
+        public Bounds(double lowerBound, double upperBound) {
+            this(TunableDouble.create(lowerBound), TunableDouble.create(upperBound));
+        }
+
+        public double clamp(double value) {
+            return Math.clamp(value, lowerBound.get(), upperBound.get());
+        }
+
+        public boolean inBound(double value) {
+            return inRange(value, lowerBound.get(), upperBound.get());
+        }
+
+        public double wrap(double value) {
+            double delta = upperBound.get() - lowerBound.get();
+            return ((value - lowerBound.get()) % delta + delta) % delta + lowerBound.get();
+        }
+ 
+        @Override
+        public void publishTunable(TunableTable table) {
+            table.publish("lowerBound", lowerBound);
+            table.publish("upperBound", upperBound);
+        }
+    }
+
     public static double avg(double... values) {
         double sum = 0.0;
         for (double v : values) {
@@ -56,7 +90,7 @@ public class MathUtils {
         return avg(arr[n / 2], arr[n / 2 + 1]);
     }
 
-    public static boolean inRange(double value, double low, double high) {
-        return value >= low && value <= high;
+    public static boolean inRange(double value, double lowerBound, double upperBound) {
+        return value >= lowerBound && value <= upperBound;
     }
 }
