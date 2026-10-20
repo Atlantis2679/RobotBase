@@ -18,10 +18,8 @@ import team2679.atlantiskit.logfields.IOBase;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public abstract class SwerveModuleIO extends IOBase {
-    public final Supplier<Angle> absoluteTurnAngle = fields.addMeasure("absoluteTurnAngle",
-        this::getAbsoluteTurnAngle, Degrees.zero());
-    public final Supplier<Angle> integratedTurnAngle = fields.addMeasure("intergatedTurnAngle",
-        this::getIntegratedTurnAngle, Degrees.zero());
+    public final Supplier<Angle> turnAngle = fields.addMeasure("turnAngle",
+        this::getTurnAngle, Degrees.zero());
     public final Supplier<Distance> driveDistance = fields.addMeasure("driveDistance",
         this::getDriveDistance, Meters.zero());
     public final Supplier<LinearVelocity> driveVelocity = fields.addMeasure("driveVelocity",
@@ -38,20 +36,17 @@ public abstract class SwerveModuleIO extends IOBase {
     protected abstract Distance getDriveDistance();
     protected abstract LinearVelocity getDriveVelocity();
 
-    protected abstract Angle getAbsoluteTurnAngle();
-    protected abstract Angle getIntegratedTurnAngle();
+    protected abstract Angle getTurnAngle();
 
     protected abstract Current getDriveCurrent();
     protected abstract Current getTurnCurrent();
 
     public abstract void setDriveVoltage(Voltage voltage);
-    public abstract void setDriveSpeed(LinearVelocity speed);
+    public abstract void setDriveVelocity(LinearVelocity speed);
 
     public abstract void setTurnDesiredAngle(Angle angle);
 
     public abstract void setCoast();
 
     public abstract void setTurnPID(PIDController pidController);
-
-    public abstract void resetTurnAngle(Angle newAngle);
 }

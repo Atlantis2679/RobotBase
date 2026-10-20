@@ -8,9 +8,12 @@ import com.pathplanner.lib.controllers.PathFollowingController;
 
 import frc.robot.utils.MathUtils.Bounds;
 
+import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Meters;
+
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.system.DCMotor;
-import org.wpilib.math.util.Units;
+import org.wpilib.units.measure.Distance;
 
 public final class SwerveConstants {
     public static final class Modules {
@@ -46,8 +49,8 @@ public final class SwerveConstants {
         public static final double DRIVE_GEAR_RATIO = 6.12;
         public static final double TURN_GEAR_RATIO = 150.0 / 7;
 
-        public static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2);
-        public static final double WHEEL_CIRCUMFERENCE_METERS = 2 * Math.PI * WHEEL_RADIUS_METERS;
+        public static final Distance WHEEL_RADIUS = Inches.of(2);
+        public static final Distance WHEEL_CIRCUMFERENCE = WHEEL_RADIUS.times(2 * Math.PI);
 
         public static final double[] OFFSETS = {
             26.015625 + 90,
@@ -91,7 +94,7 @@ public final class SwerveConstants {
         public static final double MOMENT_OF_INERTIA = 4.3;
 
         public static final ModuleConfig MODULES_CONFIG = new ModuleConfig(
-            Modules.WHEEL_RADIUS_METERS,
+            Modules.WHEEL_RADIUS.in(Meters),
             Modules.MAX_SPEED_MPS,
             PathPlanner.MOMENT_OF_INERTIA,
             DCMotor.getKrakenX60(1),

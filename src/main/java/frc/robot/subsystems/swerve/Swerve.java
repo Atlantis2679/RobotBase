@@ -17,10 +17,6 @@ import org.wpilib.tunable.TunableTable;
 
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
-import frc.robot.RobotMap.ModuleFL;
-import frc.robot.RobotMap.ModuleFR;
-import frc.robot.RobotMap.ModuleBL;
-import frc.robot.RobotMap.ModuleBR;
 import frc.robot.subsystems.poseestimation.PoseEstimator;
 import frc.robot.subsystems.poseestimation.PoseEstimator.OdometryMeasurement;
 import frc.robot.subsystems.swerve.SwerveConstants.Modules;
@@ -36,7 +32,6 @@ import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveConstants.Modules.getModuleName;
 
 import java.util.Optional;
-import java.util.Timer;
 
 public class Swerve implements Mechanism, ComplexTunable {
   private LogFieldsTable fieldsTable = new LogFieldsTable(getName());
@@ -59,8 +54,6 @@ public class Swerve implements Mechanism, ComplexTunable {
   public Swerve() {
     fieldsTable.update();
 
-    TunablesManager.add("Swerve", (Tunable) this);
-
     gyroYawDegreesCCW = new RotationalSensorHelper(imuIO.yawAngleDeg.getAsDouble());
     gyroYawDegreesCCW.enableContinuousWrap(0, 360);
 
@@ -79,7 +72,7 @@ public class Swerve implements Mechanism, ComplexTunable {
         : Optional.empty();
     PoseEstimator.getInstance().addOdometryMeasurement(
         new OdometryMeasurement(
-          Seconds.of(Timer.getTimestamp()),
+          Seconds.of(()),
           kinematics,
           getModulePositionsDelta(),
           getModulesVelocities(),
