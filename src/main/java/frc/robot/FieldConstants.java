@@ -1,19 +1,25 @@
 package frc.robot;
 
+import static org.wpilib.units.Units.Centimeters;
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.Meters;
+
 import org.wpilib.fields.Field;
 import org.wpilib.fields.Fields;
 import org.wpilib.math.geometry.Pose3d;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.Distance;
 
 public class FieldConstants {
     public static final Field FIELD = Field.loadField(Fields.FRC_2026_REBUILT_WELDED);
 
-    public static final double HEIGHT_ABOVE_FIELD_THRESHOLD_METERS = 0.05;
-    public static final double PITCH_ROLL_THRESHOLD_DEGRESS = 10;
+    public static final Distance HEIGHT_ABOVE_FIELD_THRESHOLD = Centimeters.of(5);
+    public static final Angle PITCH_ROLL_THRESHOLD = Degrees.of(10);
 
     public static boolean isOnField(Pose3d pose) {
-        if (Math.abs(pose.getZ()) > HEIGHT_ABOVE_FIELD_THRESHOLD_METERS) return false;
-        if (Math.toDegrees(Math.abs(pose.getRotation().getX())) > PITCH_ROLL_THRESHOLD_DEGRESS) return false;
-        if (Math.toDegrees(Math.abs(pose.getRotation().getY())) > PITCH_ROLL_THRESHOLD_DEGRESS) return false;  
+        if (pose.getTranslation().getMeasureZ().isNear(Meters.zero(), HEIGHT_ABOVE_FIELD_THRESHOLD)) return false;
+        if (pose.getRotation().getMeasureX().isNear(Degrees.zero(), PITCH_ROLL_THRESHOLD)) return false;
+        if (pose.getRotation().getMeasureY().isNear(Degrees.zero(), PITCH_ROLL_THRESHOLD)) return false;
         if (pose.getX() < 0 || pose.getY() < 0) return false;
         if (pose.getX() > FIELD.length || pose.getY() > FIELD.width) return false;
         return true;
