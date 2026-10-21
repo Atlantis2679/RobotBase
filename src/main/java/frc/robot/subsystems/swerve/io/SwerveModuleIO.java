@@ -7,7 +7,6 @@ import static org.wpilib.units.Units.MetersPerSecond;
 
 import java.util.function.Supplier;
 
-import org.wpilib.math.controller.PIDController;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Distance;
@@ -43,10 +42,9 @@ public abstract class SwerveModuleIO extends IOBase {
 
     public abstract void setDriveVoltage(Voltage voltage);
     public abstract void setDriveVelocity(LinearVelocity speed);
+    public abstract void setDriveCurrent(Current current);
 
     public abstract void setDesiredAngle(Angle angle);
 
     public abstract void setCoast();
-
-    public abstract void setTurnPID(PIDController pidController);
 }

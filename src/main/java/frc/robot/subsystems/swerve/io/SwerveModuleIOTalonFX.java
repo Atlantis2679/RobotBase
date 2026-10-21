@@ -11,6 +11,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -28,7 +29,6 @@ import static org.wpilib.units.Units.Rotations;
 import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.Seconds;
 
-import org.wpilib.math.controller.PIDController;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
@@ -54,6 +54,7 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
     
     private final VoltageOut driveVoltageControl = new VoltageOut(0);
     private final VelocityTorqueCurrentFOC driveVelocityControl = new VelocityTorqueCurrentFOC(0).withSlot(0);
+    private final TorqueCurrentFOC driveCurrentControl = new TorqueCurrentFOC(0);
 
     private final PositionVoltage turnVoltageControl = new PositionVoltage(0).withSlot(0);
 
@@ -192,16 +193,12 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
     }
 
     @Override
-    public void setDesiredAngle(Angle angle) {
-        turnMotor.setControl(turnVoltageControl.withPosition(angle));
+    public void setDriveCurrent(Current current) {
+        driveMotor.setControl(driveCurrentControl.withOutput(current));
     }
 
     @Override
-    public void setTurnPID(PIDController pidController) {
-        turnSlotConfigs.kP = pidController.getP();
-        turnSlotConfigs.kI = pidController.getI();
-        turnSlotConfigs.kD = pidController.getD();
-        turnMotor.getConfigurator().apply(turnSlotConfigs);
+    public void setDesiredAngle(Angle angle) {
+        turnMotor.setControl(turnVoltageControl.withPosition(angle));
     }
-
 }

@@ -40,6 +40,7 @@ import org.wpilib.units.measure.Mass;
 import org.wpilib.units.measure.MomentOfInertia;
 import org.wpilib.units.measure.Per;
 import org.wpilib.units.measure.Time;
+import org.wpilib.units.measure.Velocity;
 import org.wpilib.units.measure.Voltage;
 
 public final class SwerveConstants {
@@ -117,6 +118,12 @@ public final class SwerveConstants {
         new Translation2d(TRACK_LENGTH.div(2).unaryMinus(), TRACK_WIDTH.div(2)),
         new Translation2d(TRACK_LENGTH.div(2).unaryMinus(), TRACK_WIDTH.div(2).unaryMinus()),
     };
+
+    public static final class SysId {
+        public static final Velocity<CurrentUnit> RAMP_RATE = Amps.of(2).per(Seconds);
+        public static final Current STEP_CURRENT = Amps.of(15);
+        public static final Time TIMEOUT = Seconds.of(2.5);
+    }
 
     public static final Time GYRO_CONNECTED_DEBOUNCE_TIME = ROBOT_PERIOD.times(5);
 

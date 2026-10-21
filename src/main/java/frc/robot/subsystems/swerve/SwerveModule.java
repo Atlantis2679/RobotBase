@@ -12,7 +12,6 @@ import org.wpilib.units.measure.LinearVelocity;
 import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Volts;
 
-import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.kinematics.SwerveModulePosition;
 import org.wpilib.math.kinematics.SwerveModuleVelocity;
@@ -33,8 +32,6 @@ public class SwerveModule implements ComplexTunable {
 
     private Distance lastDriveDistance;
     private Distance currentDriveDistance;
-
-    private PIDController pidController;
 
     public SwerveModule(LogFieldsTable swerveFieldsTable, ModuleCanAddresses moduleCanAddresses, int moduleNum) {
         fieldsTable = swerveFieldsTable.getSubTable("Module " + moduleNum + " " + getModuleName(moduleNum));
@@ -58,7 +55,6 @@ public class SwerveModule implements ComplexTunable {
         currentDriveDistance = getDriveDistance();
 
         fieldsTable.recordOutputMeasure("Angle", getAngle());
-        fieldsTable.recordOutputMeasure("Drive Distance", currentDriveDistance);
         fieldsTable.recordOutput("Module Position", getModulePosition());
         fieldsTable.recordOutput("Module Position Delta", getModulePositionDelta());
     }
@@ -90,17 +86,17 @@ public class SwerveModule implements ComplexTunable {
         io.setDesiredAngle(targetVelocity.angle.getMeasure().plus(rotationalSensorHelper.getOffset())); // Converts back to not offseted angle
     }
 
+    public void runCharacterization(Current current) {
+        io.setDesiredAngle(rotationalSensorHelper.getOffset()); // Point wheel forwards
+        io.setDriveCurrent(current);
+    }
+
     public void resetAngle(Angle newAngle) {
         rotationalSensorHelper.resetAngle(newAngle);
     }
 
     public void setCoast() {
         io.setCoast();
-    }
-
-    public void setTurnPID(PIDController pidController) {
-        this.pidController = pidController;
-        io.setTurnPID(pidController);
     }
 
     public Angle getAngle() {
@@ -115,6 +111,10 @@ public class SwerveModule implements ComplexTunable {
         return io.driveDistance.get();
     }
 
+    public Current getDriveCurrent() {
+        return io.driveCurrent.get();
+    }
+
     public SwerveModulePosition getModulePosition() {
         return new SwerveModulePosition(currentDriveDistance, new Rotation2d(getAngle()));
     }
@@ -125,10 +125,6 @@ public class SwerveModule implements ComplexTunable {
 
     public SwerveModuleVelocity getModuleVelocity() {
         return new SwerveModuleVelocity(getDriveVelocity(), new Rotation2d(getAngle()));
-    }
-
-    public PIDController getTurnPID() {
-        return pidController;
     }
 
     public Current getCurrent() {

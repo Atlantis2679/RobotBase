@@ -15,6 +15,7 @@ import org.wpilib.tunable.ComplexTunable;
 import org.wpilib.tunable.TunableTable;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.LinearVelocity;
 
 import frc.robot.Robot;
@@ -139,6 +140,12 @@ public class Swerve implements Mechanism, ComplexTunable {
             module.setTargetVelocity(moduleVelocitys[module.getModuleNum()], optimize, preventJittering, useVoltage);
     }
 
+    public void runDriveCharacterization(Current current) {
+        for (SwerveModule module : modules) {
+            module.runCharacterization(current);
+        }
+    }
+
     public void setGyroOffset(Angle newGyroOffset) {
         gyroYaw.setOffset(newGyroOffset);
     }
@@ -183,6 +190,10 @@ public class Swerve implements Mechanism, ComplexTunable {
 
     public ChassisVelocities getFieldRelativeChassisVelocities() {
         return getRobotRelativeChassisVelocities().toFieldRelative(PoseEstimator.getInstance().getEstimatedPose().getRotation());
+    }
+
+    public SwerveModule[] getModules() {
+        return modules;
     }
 
     public boolean isGyroConnected() {
