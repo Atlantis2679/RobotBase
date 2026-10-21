@@ -37,6 +37,7 @@ import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Seconds;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveConstants.Modules.getModuleName;
+import static frc.robot.Constants.ROBOT_PERIOD;
 import static frc.robot.RobotMap.CANBUS;
 
 import java.util.Optional;
@@ -48,7 +49,7 @@ public class Swerve implements Mechanism, ComplexTunable {
         new SwerveModule(fieldsTable, CANBUS.MODULE_FL, 0),
         new SwerveModule(fieldsTable, CANBUS.MODULE_FR, 1),
         new SwerveModule(fieldsTable, CANBUS.MODULE_BL, 2),
-        new SwerveModule(fieldsTable, CANBUS.MODULE_BR, 2),
+        new SwerveModule(fieldsTable, CANBUS.MODULE_BR, 3),
     };
 
     private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(MODULES_LOCATIONS);
@@ -87,7 +88,7 @@ public class Swerve implements Mechanism, ComplexTunable {
                 gyroAngle));
 
         fieldsTable.recordOutputMeasure("Yaw", getGyroYaw());
-        fieldsTable.recordOutput("Is gryo connected", isGyroConnected());
+        fieldsTable.recordOutput("Is gyro connected", isGyroConnected());
         fieldsTable.recordOutput("Robot Relative Real Chassis Velocities", getRobotRelativeChassisVelocities());
         fieldsTable.recordOutput("Robot Relative Real Velocities", getModulesVelocities());
         fieldsTable.recordOutput("Modules Current Positions", getModulePositions());
@@ -119,11 +120,13 @@ public class Swerve implements Mechanism, ComplexTunable {
     }
 
     public void driveChassisVelocities(ChassisVelocities robotRelativeChassisVelocities, boolean useVoltage) {
+        robotRelativeChassisVelocities = robotRelativeChassisVelocities.discretize(ROBOT_PERIOD.in(Seconds));
+
         fieldsTable.recordOutput("Robot Relative Target ChassisVelocities", robotRelativeChassisVelocities);
 
         SwerveModuleVelocity[] moduleVelocitys = kinematics.toSwerveModuleVelocities(robotRelativeChassisVelocities);
 
-        SwerveDriveKinematics.desaturateWheelVelocities(moduleVelocitys, Modules.MAX_VELOCITY);
+        SwerveDriveKinematics.desaturateWheelVelocities(moduleVelocitys, Modules.MAX_DRIVE_VELOCITY);
 
         setModulesVelocities(moduleVelocitys, true, true, useVoltage);
     }
@@ -167,12 +170,11 @@ public class Swerve implements Mechanism, ComplexTunable {
     }
 
     public SwerveModuleVelocity[] getModulesVelocities() {
-        return new SwerveModuleVelocity[] {
-            modules[0].getModuleVelocity(),
-            modules[1].getModuleVelocity(),
-            modules[2].getModuleVelocity(),
-            modules[3].getModuleVelocity()
-        };
+        SwerveModuleVelocity[] moduleVelocities = new SwerveModuleVelocity[modules.length];
+        for (int i = 0; i < moduleVelocities.length; i++) {
+            moduleVelocities[i] = modules[i].getModuleVelocity();            
+        }
+        return moduleVelocities;
     }
 
     public ChassisVelocities getRobotRelativeChassisVelocities() {

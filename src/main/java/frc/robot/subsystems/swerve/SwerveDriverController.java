@@ -61,24 +61,26 @@ public class SwerveDriverController implements Command, ComplexTunable {
 
     @Override
     public void run(Coroutine coroutine) {
-        double velocityMultiplier = linearVelocityMultiplierSelect.getSelected();
+        while (true) {
+            double precentageForward = forwardSupplier.getAsDouble() * linearVelocityMultiplierSelect.getSelected();
+            double precentageSideways = sidewaysSupplier.getAsDouble() * linearVelocityMultiplierSelect.getSelected();
+            double precentageRotation = rotationsSupplier.getAsDouble() * rotationVelocityMultiplierSelect.getSelected();
 
-        double precentageForward = forwardSupplier.getAsDouble() * velocityMultiplier;
-        double precentageSideways = sidewaysSupplier.getAsDouble() * velocityMultiplier;
-        double precentageRotation = rotationsSupplier.getAsDouble() * velocityMultiplier;
+            if (isSensetiveMode.getAsBoolean()) {
+                precentageForward *= SENSETIVE_TRANSLATION_MULTIPLIER;
+                precentageSideways *= SENSETIVE_TRANSLATION_MULTIPLIER;
+                precentageRotation *= SENSETIVE_ROTATION_MULTIPLIER;
+            }
 
-        if (isSensetiveMode.getAsBoolean()) {
-            precentageForward *= SENSETIVE_TRANSLATION_MULTIPLIER;
-            precentageSideways *= SENSETIVE_TRANSLATION_MULTIPLIER;
-            precentageRotation *= SENSETIVE_ROTATION_MULTIPLIER;
+            swerve.drive(
+                MetersPerSecond.of(forwardSlewRateLimiter.calculate(precentageForward * MAX_LINEAR_VELOCITY.in(MetersPerSecond))),
+                MetersPerSecond.of(sidewaysSlewRateLimiter.calculate(precentageSideways * MAX_LINEAR_VELOCITY.in(MetersPerSecond))),
+                DegreesPerSecond.of(rotationSlewRateLimiter.calculate(precentageRotation * MAX_ANGULAR_VELOCITY.in(DegreesPerSecond))),
+                isFieldRelative.getAsBoolean(),
+                false);
+            
+            coroutine.yield();
         }
-
-        swerve.drive(
-            MetersPerSecond.of(forwardSlewRateLimiter.calculate(precentageForward * MAX_LINEAR_VELOCITY.in(MetersPerSecond))),
-            MetersPerSecond.of(sidewaysSlewRateLimiter.calculate(precentageSideways * MAX_LINEAR_VELOCITY.in(MetersPerSecond))),
-            DegreesPerSecond.of(rotationSlewRateLimiter.calculate(precentageRotation * MAX_ANGULAR_VELOCITY.in(DegreesPerSecond))),
-            isFieldRelative.getAsBoolean(),
-            false);
     }
 
     @Override
@@ -93,7 +95,8 @@ public class SwerveDriverController implements Command, ComplexTunable {
 
     @Override
     public void publishTunable(TunableTable table) {
-        table.publish("Velocity Multiplier Selector", linearVelocityMultiplierSelect);
+        table.publish("Drive Velocity Multiplier", linearVelocityMultiplierSelect);
+        table.publish("Turn Velocity Multiplier", rotationVelocityMultiplierSelect);
         table.publish("Run", new TunableCommand(this));
     }
 }

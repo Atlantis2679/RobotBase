@@ -11,6 +11,7 @@ import org.wpilib.units.measure.LinearVelocity;
 
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.Volts;
 
 import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.geometry.Rotation2d;
@@ -22,7 +23,7 @@ import frc.robot.RobotMap.CANBUS.ModuleCanAddresses;
 import frc.robot.subsystems.swerve.io.SwerveModuleIO;
 import frc.robot.subsystems.swerve.io.SwerveModuleIOTalonFX;
 import frc.robot.subsystems.swerve.io.SwerveModuleSim;
-import frc.robot.utils.RotationalSensorHelper;
+import frc.robot.utils.TunableMeasure;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public class SwerveModule implements ComplexTunable {
@@ -37,8 +38,6 @@ public class SwerveModule implements ComplexTunable {
 
     private PIDController pidController;
 
-    private RotationalSensorHelper rotationalSensorHelper = new RotationalSensorHelper(Degrees.zero());
-
     public SwerveModule(LogFieldsTable swerveFieldsTable, ModuleCanAddresses moduleCanAddresses, int moduleNum) {
         fieldsTable = swerveFieldsTable.getSubTable("Module " + moduleNum + " " + getModuleName(moduleNum));
         io = Robot.isReal() ? new SwerveModuleIOTalonFX(fieldsTable, moduleCanAddresses, moduleNum)
@@ -47,13 +46,9 @@ public class SwerveModule implements ComplexTunable {
         fieldsTable.update();
 
         this.moduleNum = moduleNum;
-        rotationalSensorHelper.enableContinuousWrap(TURN_ANGLE_BOUNDS);
-        rotationalSensorHelper.update(io.turnAngle.get());
     }
 
     public void periodic() {
-        rotationalSensorHelper.update(io.turnAngle.get());
-
         lastDriveDistance = currentDriveDistance;
         currentDriveDistance = getDriveDistance();
         lastAngle = currentAngle;
@@ -65,33 +60,35 @@ public class SwerveModule implements ComplexTunable {
         fieldsTable.recordOutput("Module Position Delta", getModulePositionDelta());
     }
 
-    public void setTargetVelocity(SwerveModuleVelocity targetState, boolean optimize, boolean preventJittering,
+    public void setTargetVelocity(SwerveModuleVelocity targetVelocity, boolean optimize, boolean preventJittering,
             boolean useVoltage) {
-        LinearVelocity targetStateVelocity = MetersPerSecond.of(targetState.velocity);
+        Rotation2d currentAngle = new Rotation2d(this.currentAngle);
+        if (optimize) targetVelocity = targetVelocity.optimize(currentAngle).cosineScale(currentAngle);
+
+        LinearVelocity targetStateVelocity = MetersPerSecond.of(targetVelocity.velocity);
+
         if (preventJittering
-                && targetStateVelocity.abs(MetersPerSecond) < MAX_VELOCITY.times(PREVENT_JITTERING_MULTIPLIER).in(MetersPerSecond)) {
-            io.setDriveVelocity(MetersPerSecond.zero());
+                && targetStateVelocity.abs(MetersPerSecond) < MAX_DRIVE_VELOCITY.times(PREVENT_JITTERING_MULTIPLIER).abs(MetersPerSecond)) {
+            if (useVoltage) io.setDriveVoltage(Volts.zero());
+            else io.setDriveVelocity(MetersPerSecond.zero());
             return;
         }
 
-        if (optimize)
-            targetState.optimize(new Rotation2d(currentAngle));
-
-        fieldsTable.recordOutput("Module target state", targetState);
+        fieldsTable.recordOutput("Module target state", targetVelocity);
         if (useVoltage) {
-            fieldsTable.recordOutputMeasure("Drive motor target voltage", targetStateVelocity.div(MAX_VELOCITY).times(MAX_VOLTAGE));
-            io.setDriveVoltage(targetStateVelocity.div(MAX_VELOCITY).times(MAX_VOLTAGE));
+            fieldsTable.recordOutputMeasure("Drive motor target voltage", targetStateVelocity.div(MAX_DRIVE_VELOCITY).times(MAX_VOLTAGE));
+            io.setDriveVoltage(targetStateVelocity.div(MAX_DRIVE_VELOCITY).times(MAX_VOLTAGE));
         } else {
-            fieldsTable.recordOutput("Drive motor target velocity", targetStateVelocity.div(MAX_VELOCITY));
+            fieldsTable.recordOutput("Drive motor target velocity", targetStateVelocity);
             io.setDriveVelocity(targetStateVelocity);
         }
 
-        fieldsTable.recordOutputMeasure("Turn motor target angle", targetState.angle.getMeasure());
-        io.setDesiredAngle(targetState.angle.getMeasure());
+        fieldsTable.recordOutputMeasure("Turn motor target angle", targetVelocity.angle.getMeasure());
+        io.setDesiredAngle(targetVelocity.angle.getMeasure());
     }
 
     public void resetAngle(Angle newAngle) {
-        rotationalSensorHelper.resetAngle(newAngle);
+        io.resetAngle(newAngle);
     }
 
     public void setCoast() {
@@ -104,7 +101,7 @@ public class SwerveModule implements ComplexTunable {
     }
 
     public Angle getAngle() {
-        return rotationalSensorHelper.getAngle();
+        return io.turnAngle.get();
     }
 
     public int getModuleNum() {
@@ -141,6 +138,7 @@ public class SwerveModule implements ComplexTunable {
 
     @Override
     public void publishTunable(TunableTable table) {
-        table.publish("Turn RotationalSensorHelper", rotationalSensorHelper);
+        TunableMeasure<Angle> angleToReset = TunableMeasure.of(Degrees.zero(), Degrees);
+        table.publish("Angle To Reset", angleToReset.tunable());
     }
 }

@@ -1,6 +1,6 @@
 package frc.robot.subsystems.swerve;
 
-import static frc.robot.subsystems.swerve.SwerveConstants.Modules.MAX_VELOCITY;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.MAX_DRIVE_VELOCITY;
 
 import java.util.Set;
 import java.util.function.DoubleSupplier;
@@ -33,21 +33,25 @@ public class SwerveControlModulesCommand implements Command, ComplexTunable {
 
     @Override
     public void run(Coroutine coroutine) {
-        double turnY = turnYSupplier.getAsDouble();
-        double turnX = turnXSupplier.getAsDouble();
-        double velocity = velocitySupplier.getAsDouble();
+        while (true) {
+            double turnY = turnYSupplier.getAsDouble();
+            double turnX = turnXSupplier.getAsDouble();
+            double velocity = velocitySupplier.getAsDouble();
 
-        SwerveModuleVelocity[] moduleVelocities = new SwerveModuleVelocity[4];
-        for (int i = 0; i < moduleVelocities.length; i++) {
-            double turnAngleRadians = turnX != 0 || turnY != 0
-                ? Math.atan2(turnY, turnX) - Math.toRadians(90)
-                : 0;
+            SwerveModuleVelocity[] moduleVelocities = new SwerveModuleVelocity[4];
+            for (int i = 0; i < moduleVelocities.length; i++) {
+                double turnAngleRadians = turnX != 0 || turnY != 0
+                    ? Math.atan2(turnY, turnX) - Math.toRadians(90)
+                    : 0;
 
-            moduleVelocities[i] = new SwerveModuleVelocity(
-                MAX_VELOCITY.times(velocity),
-                new Rotation2d(turnAngleRadians));
+                moduleVelocities[i] = new SwerveModuleVelocity(
+                    MAX_DRIVE_VELOCITY.times(velocity),
+                    new Rotation2d(turnAngleRadians));
+            }
+            swerve.setModulesVelocities(moduleVelocities, optimizeState.get(), false, false);
+
+            coroutine.yield();
         }
-        swerve.setModulesVelocities(moduleVelocities, optimizeState.get(), false, false);
     }
 
     @Override

@@ -1,7 +1,7 @@
 package frc.robot.subsystems.swerve;
 
 
-import static frc.robot.subsystems.swerve.SwerveConstants.Modules.MAX_VELOCITY;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.MAX_DRIVE_VELOCITY;
 import static org.wpilib.units.Units.DegreesPerSecond;
 import static org.wpilib.units.Units.MetersPerSecond;
 
@@ -27,12 +27,12 @@ public class SwerveCommands {
     }
 
     public Command driveForward(DoubleSupplier forwardPrecentageSupplier) {
-        return swerve.run((_) -> swerve.drive(MAX_VELOCITY.times(forwardPrecentageSupplier.getAsDouble()), MetersPerSecond.zero(), DegreesPerSecond.zero(), false, true))
+        return swerve.runRepeatedly(() -> swerve.drive(MAX_DRIVE_VELOCITY.times(forwardPrecentageSupplier.getAsDouble()), MetersPerSecond.zero(), DegreesPerSecond.zero(), false, true))
             .named("Drive Forward");
     }
 
     public Command xWheelLock() {
-        return swerve.run((_) -> {
+        return swerve.runRepeatedly(() -> {
             SwerveModuleVelocity[] moduleVelocities = new SwerveModuleVelocity[4];
             moduleVelocities[0] = new SwerveModuleVelocity(0, Rotation2d.fromDegrees(45));
             moduleVelocities[1] = new SwerveModuleVelocity(0, Rotation2d.fromDegrees(-45));
@@ -49,11 +49,6 @@ public class SwerveCommands {
     }
 
     public Command stop() {
-        return swerve.run((coroutine) -> {
-            while (true) {
-                swerve.stop();
-                coroutine.yield();
-            }
-        }).named("Stop");
+        return swerve.runRepeatedly(swerve::stop).named("Stop");
     }
 }

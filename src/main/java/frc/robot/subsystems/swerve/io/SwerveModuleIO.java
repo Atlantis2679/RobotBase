@@ -26,8 +26,8 @@ public abstract class SwerveModuleIO extends IOBase {
         this::getDriveVelocity, MetersPerSecond.zero());
     public final Supplier<Current> driveCurrent = fields.addMeasure("driveCurrent",
         this::getDriveCurrent, Amps.zero());
-    public final Supplier<Current> turnCurrent = fields.addMeasure("driveCurrent",
-        this::getDriveCurrent, Amps.zero());
+    public final Supplier<Current> turnCurrent = fields.addMeasure("turnCurrent",
+        this::getTurnCurrent, Amps.zero());
 
     public SwerveModuleIO(LogFieldsTable fieldsTable) {
         super(fieldsTable);
@@ -45,6 +45,8 @@ public abstract class SwerveModuleIO extends IOBase {
     public abstract void setDriveVelocity(LinearVelocity speed);
 
     public abstract void setDesiredAngle(Angle angle);
+
+    public abstract void resetAngle(Angle newAngle);
 
     public abstract void setCoast();
 

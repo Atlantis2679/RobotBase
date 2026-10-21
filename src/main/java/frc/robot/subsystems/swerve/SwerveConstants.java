@@ -9,7 +9,6 @@ import com.pathplanner.lib.controllers.PathFollowingController;
 import frc.robot.utils.MathUtils.Bounds;
 
 import static frc.robot.Constants.ROBOT_PERIOD;
-import static frc.robot.subsystems.swerve.SwerveConstants.Modules.MAX_VELOCITY;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.DegreesPerSecondPerSecond;
@@ -20,6 +19,7 @@ import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.MetersPerSecondPerSecond;
 import static org.wpilib.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.RotationsPerMinute;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
@@ -60,22 +60,21 @@ public final class SwerveConstants {
         public static final double TURN_MOTOR_KI = 0;
         public static final double TURN_MOTOR_KD = 0;
 
-        public static final Voltage MAX_VOLTAGE = Volts.of(12.5);
-        public static final LinearVelocity MAX_VELOCITY = MetersPerSecond.of(5);
-        // Also used as a refrence for percantage speed calculation - so lowering this
-        // MAY cause the modules to faster
-        // - always calibrate before changing!
-
-        public static final DCMotor DRIVE_MOTOR = DCMotor.getKrakenX60Foc(1);
-        public static final DCMotor TURN_MOTOR  = DCMotor.getFalcon500Foc(1);
+        public static final Voltage MAX_VOLTAGE = Volts.of(12);
 
         public static final double PREVENT_JITTERING_MULTIPLIER = 0.01;
 
         public static final double DRIVE_GEAR_RATIO = 6.12;
         public static final double TURN_GEAR_RATIO = 150.0 / 7;
 
+        public static final DCMotor DRIVE_MOTOR = DCMotor.getKrakenX60Foc(1);
+        public static final DCMotor TURN_MOTOR  = DCMotor.getFalcon500Foc(1);
+
         public static final Distance WHEEL_RADIUS = Inches.of(2);
         public static final Distance WHEEL_CIRCUMFERENCE = WHEEL_RADIUS.times(2 * Math.PI);
+
+        public static final AngularVelocity DRIVE_MOTOR_MAX_VELOCITY = RotationsPerMinute.of(5784).div(DRIVE_GEAR_RATIO);
+        public static final LinearVelocity MAX_DRIVE_VELOCITY = MetersPerSecond.of(DRIVE_MOTOR_MAX_VELOCITY.in(RadiansPerSecond) * WHEEL_CIRCUMFERENCE.in(Meters));
 
         public static final Angle[] OFFSETS = {
             Degrees.of(26.015625 + 90),
@@ -85,11 +84,12 @@ public final class SwerveConstants {
         };
 
         public static final Current DRIVE_STATOR_CURRENT_LIMIT = Amps.of(60);
-        public static final Current TURN_STATOR_CURRENT_LIMIT = Amps.of(30);
 
         public static final Current DRIVE_SUPPLY_CURRENT_LIMIT = Amps.of(60);
         public static final Current DRIVE_SUPPLY_CURRENT_LOWER_LIMIT = Amps.of(30);
         public static final Time DRIVE_SUPPLY_CURRENT_LOWER_TIME = Seconds.of(1);
+
+        public static final Current TURN_STATOR_CURRENT_LIMIT = Amps.of(30);
     }
 
     public static final Bounds<Angle> GYRO_ANGLE_BOUNDS = Bounds.of(Degrees.of(0), Degrees.of(360));
@@ -114,7 +114,7 @@ public final class SwerveConstants {
 
         public static final ModuleConfig MODULES_CONFIG = new ModuleConfig(
             Modules.WHEEL_RADIUS,
-            Modules.MAX_VELOCITY,
+            Modules.MAX_DRIVE_VELOCITY,
             FRICTION_WITH_CARPET,
             Modules.DRIVE_MOTOR,
             Modules.DRIVE_SUPPLY_CURRENT_LIMIT,
@@ -125,8 +125,8 @@ public final class SwerveConstants {
             PathPlanner.MOMENT_OF_INERTIA,
             MODULES_CONFIG, MODULES_LOCATIONS);
 
-        public static final PIDConstants TRANSLATION_PID = new PIDConstants(7, 0, 0.1);
-        public static final PIDConstants ROTATION_PID = new PIDConstants(0.04, 0.1, 0.005);
+        public static final PIDConstants TRANSLATION_PID = new PIDConstants(0, 0, 0);
+        public static final PIDConstants ROTATION_PID = new PIDConstants(0, 0, 0);
 
         public static final PathFollowingController FOLLOWING_CONTROLLER = new PPHolonomicDriveController(
             TRANSLATION_PID, ROTATION_PID);
@@ -135,8 +135,8 @@ public final class SwerveConstants {
     public static final class DriverController {
         public static final LinearAcceleration ACCELERATION_LIMIT = MetersPerSecondPerSecond.of(4.5);
         public static final AngularAcceleration ANGULAR_ACCELERATION_LIMIT = DegreesPerSecondPerSecond.of(720);
-        public static final AngularVelocity MAX_ANGULAR_VELOCITY = RadiansPerSecond.of(8);
-        public static final LinearVelocity MAX_LINEAR_VELOCITY = MAX_VELOCITY;
+        public static final AngularVelocity MAX_ANGULAR_VELOCITY = RadiansPerSecond.of(Modules.MAX_DRIVE_VELOCITY.in(MetersPerSecond) / MODULES_LOCATIONS[0].getNorm());
+        public static final LinearVelocity MAX_LINEAR_VELOCITY = Modules.MAX_DRIVE_VELOCITY;
         public static final double SENSETIVE_TRANSLATION_MULTIPLIER = 0.3;
         public static final double SENSETIVE_ROTATION_MULTIPLIER = 0.3;
     }
