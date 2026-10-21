@@ -1,5 +1,11 @@
 package frc.robot.subsystems.swerve.io;
 
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.MetersPerSecondPerSecond;
+
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.LinearAcceleration;
+
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public class ImuIOSim extends ImuIO {
@@ -8,8 +14,18 @@ public class ImuIOSim extends ImuIO {
     }
 
     @Override
-    protected double getYawDegreesCCW() {
-        return 0;
+    protected Angle getYaw() {
+        return Degrees.zero();
+    }
+
+    @Override
+    protected Angle getPitch() {
+        return Degrees.zero();
+    }
+
+    @Override
+    protected Angle getRoll() {
+        return Degrees.zero();
     }
 
     @Override
@@ -18,27 +34,17 @@ public class ImuIOSim extends ImuIO {
     }
 
     @Override
-    protected double getXAcceleration() {
-        return 0;
-    }
-    
-    @Override
-    protected double getYAcceleration() {
-        return 0;
-    }
-    
-    @Override
-    protected double getZAcceleration() {
-        return 0;
+    protected LinearAcceleration getXAcceleration() {
+        return MetersPerSecondPerSecond.zero();
     }
 
     @Override
-    protected double getPitchDeg() {
-        return 0;
+    protected LinearAcceleration getYAcceleration() {
+        return MetersPerSecondPerSecond.zero();
     }
 
     @Override
-    protected double getRollDeg() {
-        return 0;
+    protected LinearAcceleration getZAcceleration() {
+        return MetersPerSecondPerSecond.zero();
     }
 }

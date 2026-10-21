@@ -10,6 +10,7 @@ import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.LinearVelocity;
 
 import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.MetersPerSecond;
 
 import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.geometry.Rotation2d;
@@ -27,110 +28,70 @@ import team2679.atlantiskit.logfields.LogFieldsTable;
 public class SwerveModule implements ComplexTunable {
     private final LogFieldsTable fieldsTable;
     private final SwerveModuleIO io;
-    private final RotationalSensorHelper absoluteAngleDegreesCWW;
     private final int moduleNum;
 
     private Distance lastDriveDistance;
     private Distance currentDriveDistance;
-
-    private Angle currentIntegratedAngle;
+    private Angle lastAngle;
+    private Angle currentAngle;
 
     private PIDController pidController;
+
+    private RotationalSensorHelper rotationalSensorHelper = new RotationalSensorHelper(Degrees.zero());
 
     public SwerveModule(LogFieldsTable swerveFieldsTable, ModuleCanAddresses moduleCanAddresses, int moduleNum) {
         fieldsTable = swerveFieldsTable.getSubTable("Module " + moduleNum + " " + getModuleName(moduleNum));
         io = Robot.isReal() ? new SwerveModuleIOTalonFX(fieldsTable, moduleCanAddresses, moduleNum)
-                : new SwerveModuleSim(fieldsTable);
+                : new SwerveModuleSim(fieldsTable, moduleCanAddresses, moduleNum);
 
         fieldsTable.update();
 
         this.moduleNum = moduleNum;
-
-        absoluteAngleDegreesCWW = new RotationalSensorHelper(io.absoluteTurnAngle.get().in(Degrees), OFFSETS[moduleNum]);
-        absoluteAngleDegreesCWW.enableContinuousWrap(ANGLE_BOUNDS);
-
-        resetIntegratedAngleToAbsolute();
+        rotationalSensorHelper.enableContinuousWrap(TURN_ANGLE_BOUNDS);
+        rotationalSensorHelper.update(io.turnAngle.get());
     }
 
     public void periodic() {
-        absoluteAngleDegreesCWW.update(io.absoluteTurnAngle.get().in(Degrees));
+        rotationalSensorHelper.update(io.turnAngle.get());
+
         lastDriveDistance = currentDriveDistance;
         currentDriveDistance = getDriveDistance();
+        lastAngle = currentAngle;
+        currentAngle = getAngle();
 
-        currentIntegratedAngle = getIntegratedAngle();
-
-        fieldsTable.recordOutput("Absolute Angle", getAbsoluteDegreesCCW());
-        fieldsTable.recordOutput("Integrated Angles", getIntegratedAngle());
-        fieldsTable.recordOutput("Drive Distance", getDriveDistanceMeters());
+        fieldsTable.recordOutputMeasure("Angle", currentAngle);
+        fieldsTable.recordOutputMeasure("Drive Distance", currentDriveDistance);
         fieldsTable.recordOutput("Module Position", getModulePosition());
         fieldsTable.recordOutput("Module Position Delta", getModulePositionDelta());
     }
 
-    public void setTargetState(SwerveModuleVelocity targetState, boolean optimize, boolean preventJittering,
+    public void setTargetVelocity(SwerveModuleVelocity targetState, boolean optimize, boolean preventJittering,
             boolean useVoltage) {
+        LinearVelocity targetStateVelocity = MetersPerSecond.of(targetState.velocity);
         if (preventJittering
-                && Math.abs(targetState.velocity) < MAX_SPEED_MPS * PREVENT_JITTERING_MULTIPLIER) {
-            io.setDrivePercentageSpeed(0);
+                && targetStateVelocity.abs(MetersPerSecond) < MAX_VELOCITY.times(PREVENT_JITTERING_MULTIPLIER).in(MetersPerSecond)) {
+            io.setDriveVelocity(MetersPerSecond.zero());
             return;
         }
 
         if (optimize)
-            targetState.optimize(Rotation2d.fromDegrees(currentAngleDegreesCCW));
+            targetState.optimize(new Rotation2d(currentAngle));
 
         fieldsTable.recordOutput("Module target state", targetState);
         if (useVoltage) {
-            fieldsTable.recordOutput("Drive motor target voltage", (targetState.velocity / MAX_SPEED_MPS) * MAX_VOLTAGE);
-            io.setDriveVoltage((targetState.velocity / MAX_SPEED_MPS) * MAX_VOLTAGE);
+            fieldsTable.recordOutputMeasure("Drive motor target voltage", targetStateVelocity.div(MAX_VELOCITY).times(MAX_VOLTAGE));
+            io.setDriveVoltage(targetStateVelocity.div(MAX_VELOCITY).times(MAX_VOLTAGE));
         } else {
-            fieldsTable.recordOutput("Drive motor target speed", targetState.velocity / MAX_SPEED_MPS);
-            io.setDrivePercentageSpeed(targetState.velocity / MAX_SPEED_MPS);
+            fieldsTable.recordOutput("Drive motor target velocity", targetStateVelocity.div(MAX_VELOCITY));
+            io.setDriveVelocity(targetStateVelocity);
         }
 
-        fieldsTable.recordOutput("Turn motor target rotation", targetState.angle.getRotations());
-        io.setTurnAngleRotations(targetState.angle.getRotations());
+        fieldsTable.recordOutputMeasure("Turn motor target angle", targetState.angle.getMeasure());
+        io.setDesiredAngle(targetState.angle.getMeasure());
     }
 
-    public double getAbsoluteDegreesCCW() {
-        return absoluteAngleDegreesCWW.getAngle();
-    }
-
-    public int getModuleNum() {
-        return moduleNum;
-    }
-
-    public Distance getDriveDistance() {
-        return io.driveDistanceRotations.get();
-    }
-
-    public SwerveModulePosition getModulePosition() {
-        return new SwerveModulePosition(getDriveDistance(), new Rotation2d(getIntegratedAngle()));
-    }
-
-    public SwerveModulePosition getModulePositionDelta() {
-        return new SwerveModulePosition(getDriveDistance().minus(lastDriveDistance),
-                Rotation2d.fromDegrees(getIntegratedDegreesCCW()));
-    }
-
-    public SwerveModuleVelocity getModuleState() {
-        return new SwerveModuleVelocity(getVelocityMPS(), Rotation2d.fromDegrees(getIntegratedDegreesCCW()));
-    }
-    
-    public LinearVelocity getDriveVelocity() {
-        return io.driveVelocity.get();
-    }
-
-    public Angle getIntegratedAngle() {
-        return io.integratedTurnAngle.get();
-    }
-
-    public void resetIntegratedAngleToAbsolute() {
-        currentAngleDegreesCCW = getAbsoluteDegreesCCW();
-        io.resetIntegratedAngleRotations(currentAngleDegreesCCW / 360);
-    }
-
-    public void resetAngleDegreesCCW(double newAngle) {
-        absoluteAngleDegreesCWW.resetAngle(newAngle);
-        resetIntegratedAngleToAbsolute();
+    public void resetAngle(Angle newAngle) {
+        rotationalSensorHelper.resetAngle(newAngle);
     }
 
     public void setCoast() {
@@ -142,6 +103,30 @@ public class SwerveModule implements ComplexTunable {
         io.setTurnPID(pidController);
     }
 
+    public Angle getAngle() {
+        return rotationalSensorHelper.getAngle();
+    }
+
+    public int getModuleNum() {
+        return moduleNum;
+    }
+
+    public Distance getDriveDistance() {
+        return io.driveDistance.get();
+    }
+
+    public SwerveModulePosition getModulePosition() {
+        return new SwerveModulePosition(getDriveDistance(), new Rotation2d(getAngle()));
+    }
+
+    public SwerveModulePosition getModulePositionDelta() {
+        return new SwerveModulePosition(getDriveDistance().minus(lastDriveDistance), new Rotation2d(getAngle().minus(lastAngle)));
+    }
+
+    public SwerveModuleVelocity getModuleVelocity() {
+        return new SwerveModuleVelocity(getDriveVelocity(), new Rotation2d(getAngle()));
+    }
+
     public PIDController getTurnPID() {
         return pidController;
     }
@@ -149,14 +134,13 @@ public class SwerveModule implements ComplexTunable {
     public Current getCurrent() {
         return io.driveCurrent.get();
     }
+    
+    public LinearVelocity getDriveVelocity() {
+        return io.driveVelocity.get();
+    }
 
     @Override
     public void publishTunable(TunableTable table) {
-        table.publishDouble("Integrated Angle Degrees CCW", this::getIntegratedDegreesCCW, null);
-        table.publishDouble("Absolute Angle Degrees CCW", this::getAbsoluteDegreesCCW, null);
-        table.publishDouble("Tunable Offset", absoluteAngleDegreesCWW::getOffset, newOffset -> {
-            absoluteAngleDegreesCWW.setOffset(newOffset);
-            resetIntegratedAngleToAbsolute();
-        });
+        table.publish("Turn RotationalSensorHelper", rotationalSensorHelper);
     }
 }

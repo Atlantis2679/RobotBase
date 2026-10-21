@@ -2,18 +2,20 @@ package frc.robot.subsystems.swerve;
 
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
+import org.wpilib.command3.Scheduler;
 import org.wpilib.math.filter.Debouncer;
 import org.wpilib.math.filter.Debouncer.DebounceType;
 import org.wpilib.math.geometry.Rotation2d;
-import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.math.kinematics.SwerveDriveKinematics;
 import org.wpilib.math.kinematics.SwerveModulePosition;
 import org.wpilib.math.kinematics.SwerveModuleVelocity;
+import org.wpilib.system.Timer;
 import org.wpilib.tunable.ComplexTunable;
-import org.wpilib.tunable.Tunable;
-import org.wpilib.tunable.TunableDouble;
 import org.wpilib.tunable.TunableTable;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.LinearVelocity;
 
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
@@ -24,227 +26,184 @@ import frc.robot.subsystems.swerve.io.ImuIO;
 import frc.robot.subsystems.swerve.io.ImuIORedux;
 import frc.robot.subsystems.swerve.io.ImuIOSim;
 import frc.robot.utils.RotationalSensorHelper;
+import frc.robot.utils.TunableCommand;
+import frc.robot.utils.TunableMeasure;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
 
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.DegreesPerSecond;
+import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Seconds;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveConstants.Modules.getModuleName;
+import static frc.robot.RobotMap.CANBUS;
 
 import java.util.Optional;
 
 public class Swerve implements Mechanism, ComplexTunable {
-  private LogFieldsTable fieldsTable = new LogFieldsTable(getName());
+    private LogFieldsTable fieldsTable = new LogFieldsTable(getName());
 
-  private SwerveModule[] modules = {
-      new SwerveModule(fieldsTable, 0, ModuleFL.DRIVE_MOTOR_ID, ModuleFL.TURN_MOTOR_ID, ModuleFL.CAN_CODER_ID),
-      new SwerveModule(fieldsTable, 1, ModuleFR.DRIVE_MOTOR_ID, ModuleFR.TURN_MOTOR_ID, ModuleFR.CAN_CODER_ID),
-      new SwerveModule(fieldsTable, 2, ModuleBL.DRIVE_MOTOR_ID, ModuleBL.TURN_MOTOR_ID, ModuleBL.CAN_CODER_ID),
-      new SwerveModule(fieldsTable, 3, ModuleBR.DRIVE_MOTOR_ID, ModuleBR.TURN_MOTOR_ID, ModuleBR.CAN_CODER_ID),
-  };
-
-  private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(MODULES_LOCATIONS);
-
-  private final RotationalSensorHelper gyroYawDegreesCCW;
-
-  private final ImuIO imuIO = Robot.isReal() ? new ImuIORedux(fieldsTable) : new ImuIOSim(fieldsTable);
-
-  private final Debouncer isGyroConnectedDebouncer = new Debouncer(GYRO_CONNECTED_DEBUNCER_SECONDS, DebounceType.kFalling);
-
-  public Swerve() {
-    fieldsTable.update();
-
-    gyroYawDegreesCCW = new RotationalSensorHelper(imuIO.yawAngleDeg.getAsDouble());
-    gyroYawDegreesCCW.enableContinuousWrap(0, 360);
-
-    PeriodicAlertsGroup.defaultInstance.addErrorAlert(() -> "Gyro Disconnected!", () -> !isGyroConnected());
-  }
-
-  @Override
-  public void periodic() {
-    for (SwerveModule module : modules) {
-      module.periodic();
-    }
-
-    gyroYawDegreesCCW.update(imuIO.yawAngleDeg.getAsDouble());
-
-    Optional<Rotation2d> gyroAngle = isGyroConnected() ? Optional.of(Rotation2d.fromDegrees(getGyroYawDegreesCCW()))
-        : Optional.empty();
-    PoseEstimator.getInstance().addOdometryMeasurement(
-        new OdometryMeasurement(
-          Seconds.of(()),
-          kinematics,
-          getModulePositionsDelta(),
-          getModulesVelocities(),
-          new Translation2d(imuIO.xAcceleration.getAsDouble(), imuIO.yAcceleration.getAsDouble()),
-          gyroAngle
-    ));
-
-    fieldsTable.recordOutput("Is gryo connected", isGyroConnected());
-    fieldsTable.recordOutput("Robot Relative Real Chassis Velocities", getRobotRelativeChassisVelocities());
-    fieldsTable.recordOutput("Robot Relative Real Velocities", getModulesVelocities());
-    fieldsTable.recordOutput("Yaw degrees CCW", getGyroYawDegreesCCW());
-    fieldsTable.recordOutput("Modules Current Positions", getModulePositions());
-    fieldsTable.recordOutput("Current Commands", getRunningCommands());
-  }
-
-  public void drive(double vxSpeedMPS, double vySpeedMPS, double vAngleRandiansPS, boolean isFieldRelative,
-      boolean useVoltage) {
-    fieldsTable.recordOutput("vxSpeedMPS", vxSpeedMPS);
-    fieldsTable.recordOutput("vySpeedMPS", vySpeedMPS);
-    fieldsTable.recordOutput("isFieldRelative", isFieldRelative);
-    ChassisVelocities targetChassisVelocities = isFieldRelative ? ChassisVelocities.fromFieldRelativeVelocities(
-        RobotContainer.isRedAlliance() ? -vxSpeedMPS : vxSpeedMPS,
-        RobotContainer.isRedAlliance() ? -vySpeedMPS : vySpeedMPS,
-        vAngleRandiansPS, PoseEstimator.getInstance().getEstimatedPose().getRotation())
-        : new ChassisVelocities(vxSpeedMPS, vySpeedMPS, vAngleRandiansPS);
-
-    driveChassisVelocities(targetChassisVelocities, useVoltage);
-  }
-
-  public void stop() {
-    drive(0, 0, 0, false, true);
-  }
-
-  public void driveChassisVelocities(ChassisVelocities Velocities, boolean useVoltage) {
-    fieldsTable.recordOutput("Modules Target Chassis Velocities", Velocities);
-
-    SwerveModuleVelocity[] moduleVelocitys = kinematics.toSwerveModuleVelocities(Velocities);
-
-    SwerveDriveKinematics.desaturateWheelVelocities(moduleVelocitys, Modules.MAX_SPEED_MPS);
-
-    setModulesVelocities(moduleVelocitys, true, true, useVoltage);
-  }
-
-  public void resetModulesToAbsoulte() {
-    for (SwerveModule module : modules)
-      module.resetIntegratedAngleToAbsolute();
-  }
-
-  public void setModulesVelocities(SwerveModuleVelocity[] moduleVelocitys, boolean optimize, boolean preventJittering,
-      boolean useVoltage) {
-    fieldsTable.recordOutput("Modules Target Velocitys", moduleVelocitys);
-
-    for (SwerveModule module : modules)
-      module.setTargetVelocity(moduleVelocitys[module.getModuleNum()], optimize, preventJittering, useVoltage);
-  }
-
-  public void setGyroOffset(double newGyroOffsetCCW) {
-  }
-
-  public void coastAll() {
-    for (SwerveModule module : modules) {
-      module.setCoast();
-    }
-  }
-
-  public double getGyroYawDegreesCCW() {
-    return gyroYawDegreesCCW.getAngle();
-  }
-
-  public SwerveModulePosition[] getModulePositions() {
-    SwerveModulePosition[] positions = new SwerveModulePosition[modules.length];
-    for (int i = 0; i < modules.length; i++) {
-      positions[i] = modules[i].getModulePosition();
-    }
-    return positions;
-  }
-
-  public SwerveModulePosition[] getModulePositionsDelta() {
-    SwerveModulePosition[] positions = new SwerveModulePosition[modules.length];
-    for (int i = 0; i < modules.length; i++) {
-      positions[i] = modules[i].getModulePositionDelta();
-    }
-    return positions;
-  }
-
-  public ChassisVelocities getRobotRelativeChassisVelocities() {
-    return kinematics.toChassisVelocities(
-        modules[0].getModuleVelocity(),
-        modules[1].getModuleVelocity(),
-        modules[2].getModuleVelocity(),
-        modules[3].getModuleVelocity());
-  }
-
-  public ChassisVelocities getFieldRelativeChassisVelocities() {
-    return getRobotRelativeChassisVelocities().toFieldRelative(PoseEstimator.getInstance().getEstimatedPose().getRotation());
-  }
-  
-  public SwerveModuleVelocity[] getModulesVelocities() {
-    return new SwerveModuleVelocity[] {
-      modules[0].getModuleVelocity(),
-      modules[1].getModuleVelocity(),
-      modules[2].getModuleVelocity(),
-      modules[3].getModuleVelocity()
+    private SwerveModule[] modules = {
+        new SwerveModule(fieldsTable, CANBUS.MODULE_FL, 0),
+        new SwerveModule(fieldsTable, CANBUS.MODULE_FR, 1),
+        new SwerveModule(fieldsTable, CANBUS.MODULE_BL, 2),
+        new SwerveModule(fieldsTable, CANBUS.MODULE_BR, 2),
     };
-  }
 
-  public boolean isGyroConnected() {
-    return isGyroConnectedDebouncer.calculate(imuIO.isConnected.getAsBoolean());
-  }
+    private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(MODULES_LOCATIONS);
 
-  public double getXAcceleration() {
-    return imuIO.xAcceleration.getAsDouble();
-  }
+    private final RotationalSensorHelper gyroYaw;
 
-  public double getYAcceleration() {
-    return imuIO.yAcceleration.getAsDouble();
-  }
+    private final ImuIO imuIO = Robot.isReal() ? new ImuIORedux(fieldsTable) : new ImuIOSim(fieldsTable);
 
-  public double getZAcceleration() {
-    return imuIO.zAcceleration.getAsDouble();
-  }
+    private final Debouncer isGyroConnectedDebouncer = new Debouncer(GYRO_CONNECTED_DEBUNCE_TIME.in(Seconds), DebounceType.FALLING);
 
-  public double getRobotPitchDeg() {
-    return imuIO.pitchAngleDeg.getAsDouble();
-  }
+    public Swerve() {
+        fieldsTable.update();
 
-  public double getRobotRollDeg() {
-    return imuIO.rollAngleDeg.getAsDouble();
-  }
+        gyroYaw = new RotationalSensorHelper(imuIO.yawAngle.get());
+        gyroYaw.enableContinuousWrap(GYRO_ANGLE_BOUNDS);
 
-  public double[] getModulesCurrents() {
-    double[] currents = new double[4];
-    for (int i = 0; i < 4; ++i) {
-      currents[i] = Math.abs(modules[i].getCurrent());
+        Scheduler.getDefault().addPeriodic(this::periodic);
+
+        PeriodicAlertsGroup.defaultInstance.addMediumAlert(() -> "Gyro Disconnected!", () -> !isGyroConnected());
     }
-    return currents;
-  }
 
-  @Override
-  public void initTunable(TunableBuilder builder) {
-    builder.addChild("Module 0 FL", modules[0]);
-    builder.addChild("Module 1 FR", modules[1]);
-    builder.addChild("Module 2 BL", modules[2]);
-    builder.addChild("Module 3 BR", modules[3]);
-
-    builder.addChild("Reset moudles to absoulte",
-        new InstantCommand(this::resetModulesToAbsoulte).ignoringDisable(true));
-
-    builder.addChild("Reset absolute angle", (Tunable) (resetBuilder) -> {
-      DoubleHolder angleToReset = new DoubleHolder(0);
-      resetBuilder.addDoubleProperty("Angle to reset", angleToReset::get, angleToReset::set);
-      resetBuilder.addChild("reset!", new InstantCommand(() -> {
+    public void periodic() {
         for (SwerveModule module : modules) {
-          module.resetAngleDegreesCCW(angleToReset.get());
+            module.periodic();
         }
-      }).ignoringDisable(true));
-    });
-  }
 
-  @Override
-  public void publishTunable(TunableTable table) {
-    for (SwerveModule module : modules) {
-      int moduleNum = module.getModuleNum();
-      table.publish("Module " + moduleNum + " " + getModuleName(moduleNum), module);
+        gyroYaw.update(imuIO.yawAngle.get());
+
+        Optional<Rotation2d> gyroAngle = isGyroConnected() ? Optional.of(new Rotation2d(getGyroYaw()))
+            : Optional.empty();
+        PoseEstimator.getInstance().addOdometryMeasurement(new OdometryMeasurement(
+                Seconds.of(Timer.getTimestamp()),
+                kinematics,
+                getModulePositionsDelta(),
+                getModulesVelocities(),
+                gyroAngle));
+
+        fieldsTable.recordOutputMeasure("Yaw", getGyroYaw());
+        fieldsTable.recordOutput("Is gryo connected", isGyroConnected());
+        fieldsTable.recordOutput("Robot Relative Real Chassis Velocities", getRobotRelativeChassisVelocities());
+        fieldsTable.recordOutput("Robot Relative Real Velocities", getModulesVelocities());
+        fieldsTable.recordOutput("Modules Current Positions", getModulePositions());
+        fieldsTable.recordOutput("Current Commands", getRunningCommands().stream().map(c -> c.name()).toArray(String[]::new));
     }
 
-    table.publish("Reset absolute angle", (resetTable) -> {
-      TunableDouble angleToReset = TunableDouble.create(0);
-      resetTable.publish("Angle to reset", angleToReset);
-      resetTable.publish("Reset", Command.noRequirements((coroutine) -> {
+    public void drive(LinearVelocity vx, LinearVelocity vy, AngularVelocity vtheta, boolean isFieldRelative,
+        boolean useVoltage) {
+        fieldsTable.recordOutputMeasure("Desired vx", vx);
+        fieldsTable.recordOutputMeasure("Desired vy", vy);
+        fieldsTable.recordOutputMeasure("Desired vtheta", vtheta);
+        fieldsTable.recordOutput("isFieldRelativeDrive", isFieldRelative);
+        fieldsTable.recordOutput("voltageDrive", useVoltage);
 
-      }));
-    });
-  }
+        ChassisVelocities targetChassisVelocities;
+        if (isFieldRelative) {
+            boolean isRed = RobotContainer.isRedAlliance();
+            ChassisVelocities targetChassisVeloctiesFieldRelative = new ChassisVelocities(isRed ? vx.unaryMinus() : vx, isRed ? vy.unaryMinus() : vy, vtheta);
+            targetChassisVelocities = targetChassisVeloctiesFieldRelative.toRobotRelative(PoseEstimator.getInstance().getEstimatedPose().getRotation());
+        } else {
+            targetChassisVelocities = new ChassisVelocities(vx, vy, vtheta);
+        }
+
+        driveChassisVelocities(targetChassisVelocities, useVoltage);
+    }
+
+    public void stop() {
+        drive(MetersPerSecond.zero(), MetersPerSecond.zero(), DegreesPerSecond.zero(), false, true);
+    }
+
+    public void driveChassisVelocities(ChassisVelocities robotRelativeChassisVelocities, boolean useVoltage) {
+        fieldsTable.recordOutput("Robot Relative Target ChassisVelocities", robotRelativeChassisVelocities);
+
+        SwerveModuleVelocity[] moduleVelocitys = kinematics.toSwerveModuleVelocities(robotRelativeChassisVelocities);
+
+        SwerveDriveKinematics.desaturateWheelVelocities(moduleVelocitys, Modules.MAX_VELOCITY);
+
+        setModulesVelocities(moduleVelocitys, true, true, useVoltage);
+    }
+
+    public void setModulesVelocities(SwerveModuleVelocity[] moduleVelocitys, boolean optimize, boolean preventJittering,
+        boolean useVoltage) {
+        fieldsTable.recordOutput("Modules Target Velocitys", moduleVelocitys);
+
+        for (SwerveModule module : modules)
+            module.setTargetVelocity(moduleVelocitys[module.getModuleNum()], optimize, preventJittering, useVoltage);
+    }
+
+    public void setGyroOffset(Angle newGyroOffset) {
+        gyroYaw.setOffset(newGyroOffset);
+    }
+
+    public void coastAll() {
+        for (SwerveModule module : modules) {
+            module.setCoast();
+        }
+    }
+
+    public Angle getGyroYaw() {
+        return gyroYaw.getAngle();
+    }
+
+    public SwerveModulePosition[] getModulePositions() {
+        SwerveModulePosition[] positions = new SwerveModulePosition[modules.length];
+        for (int i = 0; i < modules.length; i++) {
+            positions[i] = modules[i].getModulePosition();
+        }
+        return positions;
+    }
+
+    public SwerveModulePosition[] getModulePositionsDelta() {
+        SwerveModulePosition[] positions = new SwerveModulePosition[modules.length];
+        for (int i = 0; i < modules.length; i++) {
+            positions[i] = modules[i].getModulePositionDelta();
+        }
+        return positions;
+    }
+
+    public SwerveModuleVelocity[] getModulesVelocities() {
+        return new SwerveModuleVelocity[] {
+            modules[0].getModuleVelocity(),
+            modules[1].getModuleVelocity(),
+            modules[2].getModuleVelocity(),
+            modules[3].getModuleVelocity()
+        };
+    }
+
+    public ChassisVelocities getRobotRelativeChassisVelocities() {
+        return kinematics.toChassisVelocities(getModulesVelocities());
+    }
+
+    public ChassisVelocities getFieldRelativeChassisVelocities() {
+        return getRobotRelativeChassisVelocities().toFieldRelative(PoseEstimator.getInstance().getEstimatedPose().getRotation());
+    }
+
+    public boolean isGyroConnected() {
+        return isGyroConnectedDebouncer.calculate(imuIO.isConnected.getAsBoolean());
+    }
+
+    @Override
+    public void publishTunable(TunableTable table) {
+        for (SwerveModule module : modules) {
+            int moduleNum = module.getModuleNum();
+            table.publish("Module " + moduleNum + " " + getModuleName(moduleNum), module);
+        }
+
+        table.publish("Yaw RotationalSensorHelper", gyroYaw);
+
+        table.publish("Reset Modules Angle", (resetTable) -> {
+            TunableMeasure<Angle> angleToReset = TunableMeasure.of(Degrees.zero(), Degrees);
+            resetTable.publish("Angle to reset", angleToReset.tunable());
+            resetTable.publish("Reset", new TunableCommand(Command.noRequirements((coroutine) -> {
+                Angle newAngle = angleToReset.get();
+                for (SwerveModule module : modules)
+                    module.resetAngle(newAngle);
+            }).named("Reset ")));
+        });
+    }
 }

@@ -44,7 +44,7 @@ public abstract class SwerveModuleIO extends IOBase {
     public abstract void setDriveVoltage(Voltage voltage);
     public abstract void setDriveVelocity(LinearVelocity speed);
 
-    public abstract void setTurnDesiredAngle(Angle angle);
+    public abstract void setDesiredAngle(Angle angle);
 
     public abstract void setCoast();
 

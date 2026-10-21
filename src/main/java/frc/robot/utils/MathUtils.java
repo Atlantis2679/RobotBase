@@ -2,9 +2,11 @@ package frc.robot.utils;
 
 import java.util.Arrays;
 
+import org.wpilib.math.util.MathUtil;
 import org.wpilib.tunable.ComplexTunable;
-import org.wpilib.tunable.TunableDouble;
 import org.wpilib.tunable.TunableTable;
+import org.wpilib.units.Measure;
+import org.wpilib.units.Unit;
 
 public class MathUtils {
     public static class CosineWaveFollower implements ComplexTunable {
@@ -40,36 +42,45 @@ public class MathUtils {
         }
     }
 
-    public static class Bounds implements ComplexTunable {
-        public final TunableDouble lowerBound;
-        public final TunableDouble upperBound;
+    public static final class Bounds<M extends Measure<?>> implements ComplexTunable {
+        public final TunableMeasure<M> lowerBound;
+        public final TunableMeasure<M> upperBound;
 
-        public Bounds(TunableDouble lowerBound, TunableDouble upperBound) {
+        private Bounds(TunableMeasure<M> lowerBound, TunableMeasure<M> upperBound) {
             this.lowerBound = lowerBound;
             this.upperBound = upperBound;
         }
 
-        public Bounds(double lowerBound, double upperBound) {
-            this(TunableDouble.create(lowerBound), TunableDouble.create(upperBound));
+        public static <U extends Unit, M extends Measure<U>> Bounds<M> of(M lower, M upper) {
+            U unit = lower.unit();
+            return new Bounds<>(TunableMeasure.of(lower, unit), TunableMeasure.of(upper, unit));
         }
 
-        public double clamp(double value) {
-            return Math.clamp(value, lowerBound.get(), upperBound.get());
+        public M clamp(M value) {
+            M lowerBound = this.lowerBound.get();
+            M upperBound = this.upperBound.get();
+            if (value.baseUnitMagnitude() < lowerBound.baseUnitMagnitude()) return lowerBound;
+            if (value.baseUnitMagnitude() > upperBound.baseUnitMagnitude()) return upperBound;
+            return value;
         }
 
-        public boolean inBound(double value) {
-            return inRange(value, lowerBound.get(), upperBound.get());
+        public boolean contains(M value) {
+            return value.baseUnitMagnitude() >= lowerBound.get().baseUnitMagnitude() && value.baseUnitMagnitude() <= upperBound.get().baseUnitMagnitude();
         }
 
-        public double wrap(double value) {
-            double delta = upperBound.get() - lowerBound.get();
-            return ((value - lowerBound.get()) % delta + delta) % delta + lowerBound.get();
+        @SuppressWarnings("unchecked")
+        public M wrap(M value) {
+            double wrapped = MathUtil.inputModulus(
+                value.baseUnitMagnitude(),
+                lowerBound.get().baseUnitMagnitude(),
+                upperBound.get().baseUnitMagnitude());
+            return (M) value.unit().ofBaseUnits(wrapped);
         }
- 
+
         @Override
         public void publishTunable(TunableTable table) {
-            table.publish("lowerBound", lowerBound);
-            table.publish("upperBound", upperBound);
+            table.publish("lowerBound", lowerBound.tunable());
+            table.publish("upperBound", upperBound.tunable());
         }
     }
 

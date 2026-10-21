@@ -20,10 +20,12 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
+import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Rotations;
 import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.Seconds;
 
 import org.wpilib.math.controller.PIDController;
 import org.wpilib.units.measure.Angle;
@@ -73,12 +75,12 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
         driveMotorConfig.Feedback.SensorToMechanismRatio = DRIVE_GEAR_RATIO;
 
         driveMotorConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-        driveMotorConfig.CurrentLimits.StatorCurrentLimit = DRIVE_STATOR_CURRENT_LIMIT;
+        driveMotorConfig.CurrentLimits.StatorCurrentLimit = DRIVE_STATOR_CURRENT_LIMIT.in(Amps);
 
         driveMotorConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-        driveMotorConfig.CurrentLimits.SupplyCurrentLimit = DRIVE_SUPPLY_CURRENT_LIMIT;
-        driveMotorConfig.CurrentLimits.SupplyCurrentLowerLimit = DRIVE_SUPPLY_CURRENT_LOWER_LIMIT;
-        driveMotorConfig.CurrentLimits.SupplyCurrentLowerTime = DRIVE_SUPPLY_CURRENT_LOWER_TIME;
+        driveMotorConfig.CurrentLimits.SupplyCurrentLimit = DRIVE_SUPPLY_CURRENT_LIMIT.in(Amps);
+        driveMotorConfig.CurrentLimits.SupplyCurrentLowerLimit = DRIVE_SUPPLY_CURRENT_LOWER_LIMIT.in(Amps);
+        driveMotorConfig.CurrentLimits.SupplyCurrentLowerTime = DRIVE_SUPPLY_CURRENT_LOWER_TIME.in(Seconds);
 
         TalonFXConfiguration turnMotorConfig = new TalonFXConfiguration();
 
@@ -93,7 +95,7 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
         turnMotorConfig.ClosedLoopGeneral.ContinuousWrap = true;
 
         turnMotorConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-        turnMotorConfig.CurrentLimits.StatorCurrentLimit = TURN_STATOR_CURRENT_LIMIT;
+        turnMotorConfig.CurrentLimits.StatorCurrentLimit = TURN_STATOR_CURRENT_LIMIT.in(Amps);
 
         turnSlotConfigs = turnMotorConfig.Slot0;
         turnSlotConfigs.kP = TURN_MOTOR_KP;
@@ -183,7 +185,7 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
     }
 
     @Override
-    public void setTurnDesiredAngle(Angle angle) {
+    public void setDesiredAngle(Angle angle) {
         turnMotor.setControl(turnVoltageControl.withPosition(angle));
     }
 

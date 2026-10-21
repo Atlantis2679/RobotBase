@@ -8,12 +8,34 @@ import com.pathplanner.lib.controllers.PathFollowingController;
 
 import frc.robot.utils.MathUtils.Bounds;
 
+import static frc.robot.Constants.ROBOT_PERIOD;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.MAX_VELOCITY;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.DegreesPerSecondPerSecond;
 import static org.wpilib.units.Units.Inches;
+import static org.wpilib.units.Units.Kilogram;
+import static org.wpilib.units.Units.KilogramSquareMeters;
 import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.MetersPerSecondPerSecond;
+import static org.wpilib.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.Seconds;
+import static org.wpilib.units.Units.Volts;
 
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularAcceleration;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.LinearAcceleration;
+import org.wpilib.units.measure.LinearVelocity;
+import org.wpilib.units.measure.Mass;
+import org.wpilib.units.measure.MomentOfInertia;
+import org.wpilib.units.measure.Time;
+import org.wpilib.units.measure.Voltage;
 
 public final class SwerveConstants {
     public static final class Modules {
@@ -32,17 +54,20 @@ public final class SwerveConstants {
             }
         }
 
-        public static final Bounds ANGLE_BOUNDS = new Bounds(0, 360);
+        public static final Bounds<Angle> TURN_ANGLE_BOUNDS = Bounds.of(Degrees.zero(), Degrees.of(360));
 
         public static final double TURN_MOTOR_KP = 1.8 * 12;
         public static final double TURN_MOTOR_KI = 0;
         public static final double TURN_MOTOR_KD = 0;
 
-        public static final double MAX_VOLTAGE = 12;
-        public static final double MAX_SPEED_MPS = 5;
+        public static final Voltage MAX_VOLTAGE = Volts.of(12.5);
+        public static final LinearVelocity MAX_VELOCITY = MetersPerSecond.of(5);
         // Also used as a refrence for percantage speed calculation - so lowering this
         // MAY cause the modules to faster
         // - always calibrate before changing!
+
+        public static final DCMotor DRIVE_MOTOR = DCMotor.getKrakenX60Foc(1);
+        public static final DCMotor TURN_MOTOR  = DCMotor.getFalcon500Foc(1);
 
         public static final double PREVENT_JITTERING_MULTIPLIER = 0.01;
 
@@ -52,52 +77,46 @@ public final class SwerveConstants {
         public static final Distance WHEEL_RADIUS = Inches.of(2);
         public static final Distance WHEEL_CIRCUMFERENCE = WHEEL_RADIUS.times(2 * Math.PI);
 
-        public static final double[] OFFSETS = {
-            26.015625 + 90,
-            -179.47265625 + 90,
-            -41.8359375 + 90,
-            -117.24609375 + 270,
+        public static final Angle[] OFFSETS = {
+            Degrees.of(26.015625 + 90),
+            Degrees.of(-179.47265625 + 90),
+            Degrees.of(-41.8359375 + 90),
+            Degrees.of(-117.24609375 + 270),
         };
 
-        public static final double DRIVE_STATOR_CURRENT_LIMIT = 60;
-        public static final double TURN_STATOR_CURRENT_LIMIT = 30;
+        public static final Current DRIVE_STATOR_CURRENT_LIMIT = Amps.of(60);
+        public static final Current TURN_STATOR_CURRENT_LIMIT = Amps.of(30);
 
-        public static final double DRIVE_SUPPLY_CURRENT_LIMIT = 60;
-        public static final double DRIVE_SUPPLY_CURRENT_LOWER_LIMIT = 30;
-        public static final double DRIVE_SUPPLY_CURRENT_LOWER_TIME = 1;
+        public static final Current DRIVE_SUPPLY_CURRENT_LIMIT = Amps.of(60);
+        public static final Current DRIVE_SUPPLY_CURRENT_LOWER_LIMIT = Amps.of(30);
+        public static final Time DRIVE_SUPPLY_CURRENT_LOWER_TIME = Seconds.of(1);
     }
 
-    public final class Sim {
-        public static final double DRIVE_MOTOR_MOMENT_OF_INERTIA = 0.025;
-        public static final double TURN_MOTOR_MOMENT_OF_INERTIA = 0.004;
+    public static final Bounds<Angle> GYRO_ANGLE_BOUNDS = Bounds.of(Degrees.of(0), Degrees.of(360));
 
-        public static final double SIM_TURN_MOTOR_KP = 1.8 * 12;
-        public static final double SIM_TURN_MOTOR_KI = 0;
-        public static final double SIM_TURN_MOTOR_KD = 0;
-    }
-
-    public static final double TRACK_LENGTH_METERS = 0.557;
-    public static final double TRACK_WIDTH_METERS = 0.557;
+    // From Module Axis of rotation to the next, not the whole chassis size
+    public static final Distance TRACK_LENGTH = Meters.of(0.557);
+    public static final Distance TRACK_WIDTH = Meters.of(0.557);
 
     public static final Translation2d[] MODULES_LOCATIONS = {
-        new Translation2d(TRACK_LENGTH_METERS / 2, TRACK_WIDTH_METERS / 2),
-        new Translation2d(TRACK_LENGTH_METERS / 2, -TRACK_WIDTH_METERS / 2),
-        new Translation2d(-TRACK_LENGTH_METERS / 2, TRACK_WIDTH_METERS / 2),
-        new Translation2d(-TRACK_LENGTH_METERS / 2, -TRACK_WIDTH_METERS / 2),
+        new Translation2d(TRACK_LENGTH.div(2), TRACK_WIDTH.div(2)),
+        new Translation2d(TRACK_LENGTH.div(2), TRACK_WIDTH.div(2).unaryMinus()),
+        new Translation2d(TRACK_LENGTH.div(2).unaryMinus(), TRACK_WIDTH.div(2)),
+        new Translation2d(TRACK_LENGTH.div(2).unaryMinus(), TRACK_WIDTH.div(2).unaryMinus()),
     };
 
-    public static final double GYRO_CONNECTED_DEBUNCER_SECONDS = 0.1;
+    public static final Time GYRO_CONNECTED_DEBUNCE_TIME = ROBOT_PERIOD.times(5);
 
     public static final class PathPlanner {
         public static final double FRICTION_WITH_CARPET = 1;
-        public static final double ROBOT_MASS_KG = 59.4;
-        public static final double MOMENT_OF_INERTIA = 4.3;
+        public static final Mass ROBOT_MASS_KG = Kilogram.of(59.4);
+        public static final MomentOfInertia MOMENT_OF_INERTIA = KilogramSquareMeters.of(4.3);
 
         public static final ModuleConfig MODULES_CONFIG = new ModuleConfig(
-            Modules.WHEEL_RADIUS.in(Meters),
-            Modules.MAX_SPEED_MPS,
-            PathPlanner.MOMENT_OF_INERTIA,
-            DCMotor.getKrakenX60(1),
+            Modules.WHEEL_RADIUS,
+            Modules.MAX_VELOCITY,
+            FRICTION_WITH_CARPET,
+            Modules.DRIVE_MOTOR,
             Modules.DRIVE_SUPPLY_CURRENT_LIMIT,
             1);
 
@@ -114,9 +133,10 @@ public final class SwerveConstants {
     }
 
     public static final class DriverController {
-        public static final double DRIVER_MAX_ANGULAR_VELOCITY_RPS = 8;
-        public static final double DRIVER_ACCELERATION_LIMIT_MPS = 4.5;
-        public static final double DRIVER_ANGULAR_ACCELERATION_LIMIT_RPS =  Math.toRadians(720);
+        public static final LinearAcceleration ACCELERATION_LIMIT = MetersPerSecondPerSecond.of(4.5);
+        public static final AngularAcceleration ANGULAR_ACCELERATION_LIMIT = DegreesPerSecondPerSecond.of(720);
+        public static final AngularVelocity MAX_ANGULAR_VELOCITY = RadiansPerSecond.of(8);
+        public static final LinearVelocity MAX_LINEAR_VELOCITY = MAX_VELOCITY;
         public static final double SENSETIVE_TRANSLATION_MULTIPLIER = 0.3;
         public static final double SENSETIVE_ROTATION_MULTIPLIER = 0.3;
     }

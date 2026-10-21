@@ -1,92 +1,93 @@
 package frc.robot.utils;
 
-import org.wpilib.command3.Command;
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.Seconds;
+
 import org.wpilib.system.Timer;
 import org.wpilib.tunable.ComplexTunable;
-import org.wpilib.tunable.TunableDouble;
 import org.wpilib.tunable.TunableTable;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Time;
 
 import frc.robot.utils.MathUtils.Bounds;
 
 public class RotationalSensorHelper implements ComplexTunable {
-    private double measuredAngle;
-    private double offset;
-    private double previousAngle;
-    private double currTimeSec;
-    private double prevTimeSec;
-    private double calculatedAngle;
+    private Angle measuredAngle;
+    private Angle offset;
+    private Angle previousAngle;
+    private Time currTime;
+    private Time prevTime;
+    private Angle calculatedAngle;
 
     private boolean continousWrapEnabled;
-    private Bounds bounds;
+    private Bounds<Angle> wrapBounds;
 
-    public RotationalSensorHelper(double initialMeasuredAngle, double initialOffset) {
+    public RotationalSensorHelper(Angle initialMeasuredAngle, Angle initialOffset) {
         measuredAngle = initialMeasuredAngle;
         offset = initialOffset;
-        prevTimeSec = Timer.getTimestamp();
+        prevTime = Seconds.of(Timer.getTimestamp());
         recalculateAngle();
     }
 
-    public RotationalSensorHelper(double initalMeasuredAngle) {
-        this(initalMeasuredAngle, 0);
+    public RotationalSensorHelper(Angle initalMeasuredAngle) {
+        this(initalMeasuredAngle, Degrees.zero());
     }
 
-    public void update(double measuredAngle) {
+    public void update(Angle measuredAngle) {
         this.measuredAngle = measuredAngle;
-        prevTimeSec = currTimeSec;
-        currTimeSec = Timer.getTimestamp();
+        prevTime = currTime;
+        currTime = Seconds.of(Timer.getTimestamp());
         previousAngle = calculatedAngle;
         recalculateAngle();
     }
 
     public void recalculateAngle() {
-        calculatedAngle = measuredAngle - offset;
+        calculatedAngle = measuredAngle.minus(offset);
         if (continousWrapEnabled) {
-            calculatedAngle = bounds.wrap(calculatedAngle);
+            calculatedAngle = wrapBounds.wrap(calculatedAngle);
         }
     }
 
-    public void resetAngle(double newAngle) {
-        setOffset(measuredAngle - newAngle);
+    public void resetAngle(Angle newAngle) {
+        setOffset(measuredAngle.minus(newAngle));
     }
 
-    public void enableContinuousWrap(Bounds bounds) {
+    public void enableContinuousWrap(Bounds<Angle> wrapBounds) {
         continousWrapEnabled = true;
-        this.bounds = bounds;
+        this.wrapBounds = wrapBounds;
         recalculateAngle();
     }
 
-    public void setOffset(double offset) {
-        previousAngle += this.offset - offset;
+    public void setOffset(Angle offset) {
+        previousAngle = previousAngle.plus(this.offset).minus(offset);
         if(continousWrapEnabled)
-            previousAngle = bounds.wrap(previousAngle);
+            previousAngle = wrapBounds.wrap(previousAngle);
         this.offset = offset;
         recalculateAngle();
     }
 
-    public double getAngle() {
+    public Angle getAngle() {
         return calculatedAngle;
     }
 
-    public double getMeasuredAngle() {
+    public Angle getMeasuredAngle() {
         return measuredAngle;
     }
 
-    public double getVelocity() {
-        double deltaTime = currTimeSec - prevTimeSec;
-        return (getAngle() - previousAngle) / deltaTime;
+    public AngularVelocity getVelocity() {
+        Time dt = currTime.minus(prevTime);
+        return getAngle().minus(previousAngle).div(dt);
     }
 
-    public double getOffset() {
+    public Angle getOffset() {
         return offset;
     }
 
     @Override
     public void publishTunable(TunableTable table) {
-        TunableDouble angleToReset = TunableDouble.create();
-        table.publish("angleToReset", angleToReset);
-        TunableCommand resetCommand = new TunableCommand(Command.noRequirements((coroutine) -> {
-            resetAngle(angleToReset.get());
-        }).named("ResetRotationalSensorAngle"));
-        table.publish("Reset!", resetCommand);
+        table.publish("Wrap Bounds", wrapBounds);
+        table.publish("Offset", TunableMeasure.of(getOffset(), Degrees).tunable());
+        table.publish("Angle", TunableMeasure.of(getAngle(), Degrees).tunable());
     }
 }

@@ -1,6 +1,8 @@
 package frc.robot.subsystems.poseestimation;
 
 import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.*;
+import static org.wpilib.units.Units.Degrees;
+import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.Seconds;
 
 import java.util.ArrayList;
@@ -12,7 +14,6 @@ import java.util.function.Consumer;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.geometry.Transform2d;
-import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.geometry.Twist2d;
 import org.wpilib.math.interpolation.TimeInterpolatableBuffer;
 import org.wpilib.math.kinematics.SwerveDriveKinematics;
@@ -26,6 +27,7 @@ import org.wpilib.math.util.Nat;
 import org.wpilib.system.Timer;
 import org.wpilib.tunable.ComplexTunable;
 import org.wpilib.tunable.TunableTable;
+import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Time;
 
 import frc.robot.RobotContainer;
@@ -46,8 +48,8 @@ public class PoseEstimator implements ComplexTunable {
     
     private TunableTrustLevel odometryTrustLevel = new TunableTrustLevel(ODOMETRY_STD_DEVS);
 
-    private RotationalSensorHelper yawRotationalSensorHelper = new RotationalSensorHelper(0);
-    private Optional<Rotation2d> lastGyroAngle = Optional.empty();
+    private RotationalSensorHelper yawRotationalSensorHelper = new RotationalSensorHelper(Degrees.zero());
+    private Optional<Angle> lastGyroAngle = Optional.empty();
 
     private Time lastResetTimestamp = Seconds.zero();
 
@@ -60,19 +62,19 @@ public class PoseEstimator implements ComplexTunable {
     public void addOdometryMeasurement(OdometryMeasurement measurement) {
         Twist2d twist2d = measurement.kinematics.toTwist2d(measurement.modulePositionsDelta);
         if (measurement.gyroAngle.isPresent()) {
-          if (lastGyroAngle.isEmpty()) {
-            yawRotationalSensorHelper.setOffset(measurement.gyroAngle.get().minus(odometryPose.getRotation()).getDegrees());
-          } else {
-            twist2d.dtheta = measurement.gyroAngle.get().minus(lastGyroAngle.get()).getRadians();
-          }
-          lastGyroAngle = Optional.of(measurement.gyroAngle.get());
+            if (lastGyroAngle.isEmpty()) {
+            yawRotationalSensorHelper.setOffset(measurement.gyroAngle.get().minus(odometryPose.getRotation()).getMeasure());
+            } else {
+            twist2d.dtheta = measurement.gyroAngle.get().getMeasure().minus(lastGyroAngle.get()).in(Radians);
+            }
+            lastGyroAngle = Optional.of(measurement.gyroAngle.get().getMeasure());
         } else {
-          lastGyroAngle = Optional.empty();
+            lastGyroAngle = Optional.empty();
         }
         fieldsTable.recordOutput("OdometryTwist", twist2d);
         Pose2d lastOdometryPose = odometryPose;
         odometryPose = odometryPose.plus(twist2d.exp());
-        yawRotationalSensorHelper.update(odometryPose.getRotation().getDegrees());
+        yawRotationalSensorHelper.update(odometryPose.getRotation().getMeasure());
         fieldsTable.recordOutput("Current Odometry Pose", odometryPose);
         fieldsTable.recordOutput("YawAngluarVelocity", yawRotationalSensorHelper.getVelocity());
         odometryPosesBuffer.addSample(measurement.timestamp.in(Seconds), odometryPose);
@@ -156,7 +158,7 @@ public class PoseEstimator implements ComplexTunable {
         estimatedPose = newPose;
         odometryPosesBuffer.clear();
         lastGyroAngle = Optional.empty();
-        yawRotationalSensorHelper.resetAngle(0);
+        yawRotationalSensorHelper.resetAngle(Degrees.zero());
         lastResetTimestamp = Seconds.of(Timer.getTimestamp());
         fieldsTable.recordOutput("Current Odometry Pose", odometryPose);
         fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
@@ -189,8 +191,8 @@ public class PoseEstimator implements ComplexTunable {
 
     public record OdometryMeasurement(
         Time timestamp,
-        SwerveDriveKinematics kinematics, SwerveModulePosition[] modulePositionsDelta,
+        SwerveDriveKinematics kinematics,
+        SwerveModulePosition[] modulePositionsDelta,
         SwerveModuleVelocity[] moduleVelocities,
-        Translation2d robotIMUAcceleration,
         Optional<Rotation2d> gyroAngle) {}
 }

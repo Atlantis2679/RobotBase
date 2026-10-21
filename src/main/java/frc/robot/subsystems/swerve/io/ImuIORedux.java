@@ -4,6 +4,11 @@ package frc.robot.subsystems.swerve.io;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 import static frc.robot.RobotMap.CANBUS.CAN_AND_GYRO_ID;
+import static org.wpilib.units.Units.Gs;
+import static org.wpilib.units.Units.Rotations;
+
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.LinearAcceleration;
 
 import com.reduxrobotics.canandgyro.Canandgyro;
 
@@ -15,18 +20,18 @@ public class ImuIORedux extends ImuIO {
     }
 
     @Override
-    protected double getYawDegreesCCW() {
-        return canandgyro.getYaw() * 360 + 180;
+    protected Angle getYaw() {
+        return Rotations.of(canandgyro.getYaw());
     }
 
     @Override
-    protected double getPitchDeg() {
-        return canandgyro.getPitch() * 360 + 180;
+    protected Angle getPitch() {
+        return Rotations.of(canandgyro.getPitch());
     }
 
     @Override
-    protected double getRollDeg() {
-        return canandgyro.getRoll() * 360 + 180;
+    protected Angle getRoll() {
+        return Rotations.of(canandgyro.getRoll());
     }
 
     @Override
@@ -35,17 +40,17 @@ public class ImuIORedux extends ImuIO {
     }
 
     @Override
-    protected double getXAcceleration() {
-        return canandgyro.getAccelerationX();
+    protected LinearAcceleration getXAcceleration() {
+        return Gs.of(canandgyro.getAccelerationX());
     }
 
     @Override
-    protected double getYAcceleration() {
-        return canandgyro.getAccelerationY();
+    protected LinearAcceleration getYAcceleration() {
+        return Gs.of(canandgyro.getAccelerationY());
     }
 
     @Override
-    protected double getZAcceleration() {
-        return canandgyro.getAccelerationZ();
-    }   
+    protected LinearAcceleration getZAcceleration() {
+        return Gs.of(canandgyro.getAccelerationZ());
+    }
 }
