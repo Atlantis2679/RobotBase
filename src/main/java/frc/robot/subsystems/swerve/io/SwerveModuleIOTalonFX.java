@@ -23,6 +23,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.MetersPerSecondPerSecond;
 import static org.wpilib.units.Units.Rotations;
 import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.Seconds;
@@ -65,8 +66,8 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
     public SwerveModuleIOTalonFX(LogFieldsTable fieldsTable, ModuleCanAddresses moduleCanAddresses, int moduleNum) {
         super(fieldsTable);
         driveMotor = new TalonFX(moduleCanAddresses.drive().id(), new CANBus(moduleCanAddresses.drive().port()));
-        turnMotor = new TalonFX(moduleCanAddresses.turn().id(), new CANBus(moduleCanAddresses.turn().port()));;
-        canCoder = new CANcoder(moduleCanAddresses.canCoder().id(), new CANBus(moduleCanAddresses.canCoder().port()));;
+        turnMotor = new TalonFX(moduleCanAddresses.turn().id(), new CANBus(moduleCanAddresses.turn().port()));
+        canCoder = new CANcoder(moduleCanAddresses.canCoder().id(), new CANBus(moduleCanAddresses.canCoder().port()));
 
         TalonFXConfiguration driveMotorConfig = new TalonFXConfiguration();
 
@@ -82,9 +83,9 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
         driveMotorConfig.CurrentLimits.SupplyCurrentLowerTime = DRIVE_SUPPLY_CURRENT_LOWER_TIME.in(Seconds);
 
         Slot0Configs driveSlotConfig = driveMotorConfig.Slot0;
-        driveSlotConfig.kS = DRIVE_MOTOR_KS;
-        driveSlotConfig.kA = DRIVE_MOTOR_KA;
-        driveSlotConfig.kV = DRIVE_MOTOR_KV;
+        driveSlotConfig.kS = DRIVE_MOTOR_KS.in(Amps);
+        driveSlotConfig.kV = DRIVE_MOTOR_KV.in(Amps.per(MetersPerSecond)) * WHEEL_CIRCUMFERENCE.in(Meters);
+        driveSlotConfig.kA = DRIVE_MOTOR_KA.in(Amps.per(MetersPerSecondPerSecond)) * WHEEL_CIRCUMFERENCE.in(Meters);;
 
         driveSlotConfig.kP = DRIVE_MOTOR_KP;
         driveSlotConfig.kI = DRIVE_MOTOR_KI;

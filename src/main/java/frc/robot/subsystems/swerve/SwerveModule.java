@@ -33,8 +33,6 @@ public class SwerveModule implements ComplexTunable {
 
     private Distance lastDriveDistance;
     private Distance currentDriveDistance;
-    private Angle lastAngle;
-    private Angle currentAngle;
 
     private PIDController pidController;
 
@@ -51,7 +49,6 @@ public class SwerveModule implements ComplexTunable {
         rotationalSensorHelper.enableContinuousWrap(TURN_ANGLE_BOUNDS);
 
         currentDriveDistance = getDriveDistance();
-        currentAngle = getAngle();
     }
 
     public void periodic() {
@@ -59,10 +56,8 @@ public class SwerveModule implements ComplexTunable {
 
         lastDriveDistance = currentDriveDistance;
         currentDriveDistance = getDriveDistance();
-        lastAngle = currentAngle;
-        currentAngle = getAngle();
 
-        fieldsTable.recordOutputMeasure("Angle", currentAngle);
+        fieldsTable.recordOutputMeasure("Angle", getAngle());
         fieldsTable.recordOutputMeasure("Drive Distance", currentDriveDistance);
         fieldsTable.recordOutput("Module Position", getModulePosition());
         fieldsTable.recordOutput("Module Position Delta", getModulePositionDelta());
@@ -70,7 +65,7 @@ public class SwerveModule implements ComplexTunable {
 
     public void setTargetVelocity(SwerveModuleVelocity targetVelocity, boolean optimize, boolean preventJittering,
             boolean useVoltage) {
-        Rotation2d currentAngle = new Rotation2d(this.currentAngle);
+        Rotation2d currentAngle = new Rotation2d(getAngle());
         if (optimize) targetVelocity = targetVelocity.optimize(currentAngle).cosineScale(currentAngle);
 
         LinearVelocity targetStateVelocity = MetersPerSecond.of(targetVelocity.velocity);
@@ -109,7 +104,7 @@ public class SwerveModule implements ComplexTunable {
     }
 
     public Angle getAngle() {
-        return io.turnAngle.get();
+        return rotationalSensorHelper.getAngle();
     }
 
     public int getModuleNum() {
@@ -121,11 +116,11 @@ public class SwerveModule implements ComplexTunable {
     }
 
     public SwerveModulePosition getModulePosition() {
-        return new SwerveModulePosition(getDriveDistance(), new Rotation2d(getAngle()));
+        return new SwerveModulePosition(currentDriveDistance, new Rotation2d(getAngle()));
     }
 
     public SwerveModulePosition getModulePositionDelta() {
-        return new SwerveModulePosition(getDriveDistance().minus(lastDriveDistance), new Rotation2d(getAngle().minus(lastAngle)));
+        return new SwerveModulePosition(currentDriveDistance.minus(lastDriveDistance), new Rotation2d(getAngle())); // The angle doesn't use the delta
     }
 
     public SwerveModuleVelocity getModuleVelocity() {

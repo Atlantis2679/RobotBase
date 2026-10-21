@@ -20,10 +20,10 @@ public class SwerveCommands {
     }
 
     public SwerveDriverController driverController(DoubleSupplier forwardSupplier, DoubleSupplier sidewaysSupplier,
-        DoubleSupplier rotationSupplier, BooleanSupplier isFieldRelativeSupplier, BooleanSupplier isSensetiveMode) {
+        DoubleSupplier rotationSupplier, BooleanSupplier isFieldRelativeSupplier, BooleanSupplier isSensitiveMode) {
 
         return new SwerveDriverController(swerve, forwardSupplier, sidewaysSupplier, rotationSupplier,
-            isFieldRelativeSupplier, isSensetiveMode);
+            isFieldRelativeSupplier, isSensitiveMode);
     }
 
     public Command driveForward(DoubleSupplier forwardPrecentageSupplier) {

@@ -27,7 +27,9 @@ public class RotationalSensorHelper implements ComplexTunable {
         measuredAngle = initialMeasuredAngle;
         offset = initialOffset;
         prevTime = Seconds.of(Timer.getTimestamp());
+        currTime = prevTime;
         recalculateAngle();
+        previousAngle = calculatedAngle;
     }
 
     public RotationalSensorHelper(Angle initalMeasuredAngle) {

@@ -58,7 +58,7 @@ public class Swerve implements Mechanism, ComplexTunable {
 
     private final ImuIO imuIO = Robot.isReal() ? new ImuIORedux(fieldsTable) : new ImuIOSim(fieldsTable);
 
-    private final Debouncer isGyroConnectedDebouncer = new Debouncer(GYRO_CONNECTED_DEBUNCE_TIME.in(Seconds), DebounceType.FALLING);
+    private final Debouncer isGyroConnectedDebouncer = new Debouncer(GYRO_CONNECTED_DEBOUNCE_TIME.in(Seconds), DebounceType.FALLING);
 
     public Swerve() {
         fieldsTable.update();

@@ -27,7 +27,7 @@ public class SwerveDriverController implements Command, ComplexTunable {
     private DoubleSupplier forwardSupplier;
     private DoubleSupplier rotationsSupplier;
     private BooleanSupplier isFieldRelative;
-    private BooleanSupplier isSensetiveMode;
+    private BooleanSupplier isSensitiveMode;
 
     private final Selectable<Double> linearVelocityMultiplierSelect = new Selectable<>();
     private final Selectable<Double> rotationVelocityMultiplierSelect = new Selectable<>();
@@ -37,17 +37,17 @@ public class SwerveDriverController implements Command, ComplexTunable {
     private final SlewRateLimiter rotationSlewRateLimiter = new SlewRateLimiter(ANGULAR_ACCELERATION_LIMIT.in(DegreesPerSecondPerSecond));
 
     public SwerveDriverController(Swerve swerve, DoubleSupplier forwardSupplier, DoubleSupplier sidewaysSupplier,
-        DoubleSupplier rotationsSupplier, BooleanSupplier isFieldRelative, BooleanSupplier isSensetiveMode) {
+        DoubleSupplier rotationsSupplier, BooleanSupplier isFieldRelative, BooleanSupplier isSensitiveMode) {
         this.swerve = swerve;
 
         this.sidewaysSupplier = sidewaysSupplier;
         this.forwardSupplier = forwardSupplier;
         this.rotationsSupplier = rotationsSupplier;
         this.isFieldRelative = isFieldRelative;
-        this.isSensetiveMode = isSensetiveMode;
+        this.isSensitiveMode = isSensitiveMode;
 
         linearVelocityMultiplierSelect.addDefault("REGULAR (100%)", 1.0);
-        linearVelocityMultiplierSelect.add("TEENEGER (75%)", 0.75);
+        linearVelocityMultiplierSelect.add("TEENAGER (75%)", 0.75);
         linearVelocityMultiplierSelect.add("CHILD (50%)", 0.5);
         linearVelocityMultiplierSelect.add("BABY (30%)", 0.3);
         linearVelocityMultiplierSelect.add("EGG (10%)", 0.1);
@@ -66,10 +66,10 @@ public class SwerveDriverController implements Command, ComplexTunable {
             double precentageSideways = sidewaysSupplier.getAsDouble() * linearVelocityMultiplierSelect.getSelected();
             double precentageRotation = rotationsSupplier.getAsDouble() * rotationVelocityMultiplierSelect.getSelected();
 
-            if (isSensetiveMode.getAsBoolean()) {
-                precentageForward *= SENSETIVE_TRANSLATION_MULTIPLIER;
-                precentageSideways *= SENSETIVE_TRANSLATION_MULTIPLIER;
-                precentageRotation *= SENSETIVE_ROTATION_MULTIPLIER;
+            if (isSensitiveMode.getAsBoolean()) {
+                precentageForward *= SENSITIVE_TRANSLATION_MULTIPLIER;
+                precentageSideways *= SENSITIVE_TRANSLATION_MULTIPLIER;
+                precentageRotation *= SENSITIVE_ROTATION_MULTIPLIER;
             }
 
             swerve.drive(

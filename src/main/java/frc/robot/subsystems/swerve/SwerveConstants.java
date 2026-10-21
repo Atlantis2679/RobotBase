@@ -26,6 +26,9 @@ import static org.wpilib.units.Units.Volts;
 
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.CurrentUnit;
+import org.wpilib.units.LinearAccelerationUnit;
+import org.wpilib.units.LinearVelocityUnit;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularAcceleration;
 import org.wpilib.units.measure.AngularVelocity;
@@ -35,6 +38,7 @@ import org.wpilib.units.measure.LinearAcceleration;
 import org.wpilib.units.measure.LinearVelocity;
 import org.wpilib.units.measure.Mass;
 import org.wpilib.units.measure.MomentOfInertia;
+import org.wpilib.units.measure.Per;
 import org.wpilib.units.measure.Time;
 import org.wpilib.units.measure.Voltage;
 
@@ -55,9 +59,9 @@ public final class SwerveConstants {
             }
         }
 
-        public static final double DRIVE_MOTOR_KS = 0;
-        public static final double DRIVE_MOTOR_KA = 0;
-        public static final double DRIVE_MOTOR_KV = 0;
+        public static final Current DRIVE_MOTOR_KS = Amps.of(0);
+        public static final Per<CurrentUnit, LinearVelocityUnit> DRIVE_MOTOR_KV = Amps.per(MetersPerSecond).ofNative(0);
+        public static final Per<CurrentUnit, LinearAccelerationUnit> DRIVE_MOTOR_KA = Amps.per(MetersPerSecondPerSecond).ofNative(0);
 
         public static final double DRIVE_MOTOR_KP = 0;
         public static final double DRIVE_MOTOR_KI = 0;
@@ -114,7 +118,7 @@ public final class SwerveConstants {
         new Translation2d(TRACK_LENGTH.div(2).unaryMinus(), TRACK_WIDTH.div(2).unaryMinus()),
     };
 
-    public static final Time GYRO_CONNECTED_DEBUNCE_TIME = ROBOT_PERIOD.times(5);
+    public static final Time GYRO_CONNECTED_DEBOUNCE_TIME = ROBOT_PERIOD.times(5);
 
     public static final class PathPlanner {
         public static final double FRICTION_WITH_CARPET = 1;
@@ -146,7 +150,7 @@ public final class SwerveConstants {
         public static final AngularAcceleration ANGULAR_ACCELERATION_LIMIT = DegreesPerSecondPerSecond.of(720);
         public static final AngularVelocity MAX_ANGULAR_VELOCITY = RadiansPerSecond.of(Modules.MAX_DRIVE_VELOCITY.in(MetersPerSecond) / MODULES_LOCATIONS[0].getNorm());
         public static final LinearVelocity MAX_LINEAR_VELOCITY = Modules.MAX_DRIVE_VELOCITY;
-        public static final double SENSETIVE_TRANSLATION_MULTIPLIER = 0.3;
-        public static final double SENSETIVE_ROTATION_MULTIPLIER = 0.3;
+        public static final double SENSITIVE_TRANSLATION_MULTIPLIER = 0.3;
+        public static final double SENSITIVE_ROTATION_MULTIPLIER = 0.3;
     }
 }

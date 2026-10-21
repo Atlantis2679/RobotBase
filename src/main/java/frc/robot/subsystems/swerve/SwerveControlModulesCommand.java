@@ -39,10 +39,10 @@ public class SwerveControlModulesCommand implements Command, ComplexTunable {
             double velocity = velocitySupplier.getAsDouble();
 
             SwerveModuleVelocity[] moduleVelocities = new SwerveModuleVelocity[4];
+            double turnAngleRadians = turnX != 0 || turnY != 0
+                ? Math.atan2(turnY, turnX) - Math.toRadians(90)
+                : 0;
             for (int i = 0; i < moduleVelocities.length; i++) {
-                double turnAngleRadians = turnX != 0 || turnY != 0
-                    ? Math.atan2(turnY, turnX) - Math.toRadians(90)
-                    : 0;
 
                 moduleVelocities[i] = new SwerveModuleVelocity(
                     MAX_DRIVE_VELOCITY.times(velocity),
