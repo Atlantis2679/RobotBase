@@ -10,8 +10,8 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
-import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -23,7 +23,6 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.MetersPerSecond;
-import static org.wpilib.units.Units.Rotation;
 import static org.wpilib.units.Units.Rotations;
 import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.Seconds;
@@ -38,7 +37,6 @@ import org.wpilib.units.measure.Voltage;
 
 import frc.robot.RobotMap.CANBUS.ModuleCanAddresses;
 import frc.robot.utils.AlertsFactory;
-import frc.robot.utils.MathUtils.Bounds;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
 
@@ -54,7 +52,7 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
     private final StatusSignal<Current> turnTorqueCurrent;
     
     private final VoltageOut driveVoltageControl = new VoltageOut(0);
-    private final MotionMagicVelocityTorqueCurrentFOC driveVelocityControl = new MotionMagicVelocityTorqueCurrentFOC(0).withSlot(0);
+    private final VelocityTorqueCurrentFOC driveVelocityControl = new VelocityTorqueCurrentFOC(0).withSlot(0);
 
     private final PositionVoltage turnVoltageControl = new PositionVoltage(0).withSlot(0);
 
@@ -84,7 +82,13 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
         driveMotorConfig.CurrentLimits.SupplyCurrentLowerTime = DRIVE_SUPPLY_CURRENT_LOWER_TIME.in(Seconds);
 
         Slot0Configs driveSlotConfig = driveMotorConfig.Slot0;
-        driveSlotConfig.kV = DRIVE_MOTOR.Kv;
+        driveSlotConfig.kS = DRIVE_MOTOR_KS;
+        driveSlotConfig.kA = DRIVE_MOTOR_KA;
+        driveSlotConfig.kV = DRIVE_MOTOR_KV;
+
+        driveSlotConfig.kP = DRIVE_MOTOR_KP;
+        driveSlotConfig.kI = DRIVE_MOTOR_KI;
+        driveSlotConfig.kD = DRIVE_MOTOR_KD;
 
         TalonFXConfiguration turnMotorConfig = new TalonFXConfiguration();
 
@@ -109,7 +113,6 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
         CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
 
         canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-        canCoderConfig.MagnetSensor.MagnetOffset = Bounds.of(Rotations.zero(), Rotation.of(1)).wrap(OFFSETS[moduleNum]).in(Rotations);
 
         driveMotorStatus = driveMotor.getConfigurator().apply(driveMotorConfig);
         turnMotorStatus = turnMotor.getConfigurator().apply(turnMotorConfig);
@@ -183,18 +186,13 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
     }
 
     @Override
-    public void setDriveVelocity(LinearVelocity speed) {
-        driveMotor.setControl(driveVelocityControl.withVelocity(speed.in(MetersPerSecond) / WHEEL_CIRCUMFERENCE.in(Meters)));
+    public void setDriveVelocity(LinearVelocity velocity) {
+        driveMotor.setControl(driveVelocityControl.withVelocity(velocity.in(MetersPerSecond) / WHEEL_CIRCUMFERENCE.in(Meters)));
     }
 
     @Override
     public void setDesiredAngle(Angle angle) {
         turnMotor.setControl(turnVoltageControl.withPosition(angle));
-    }
-
-    @Override
-    public void resetAngle(Angle newAngle) {
-        turnMotor.setPosition(newAngle);
     }
 
     @Override

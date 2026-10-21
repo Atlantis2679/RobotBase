@@ -20,6 +20,7 @@ import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.MetersPerSecondPerSecond;
 import static org.wpilib.units.Units.RadiansPerSecond;
 import static org.wpilib.units.Units.RotationsPerMinute;
+import static org.wpilib.units.Units.RotationsPerSecond;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
@@ -54,11 +55,19 @@ public final class SwerveConstants {
             }
         }
 
-        public static final Bounds<Angle> TURN_ANGLE_BOUNDS = Bounds.of(Degrees.zero(), Degrees.of(360));
+        public static final double DRIVE_MOTOR_KS = 0;
+        public static final double DRIVE_MOTOR_KA = 0;
+        public static final double DRIVE_MOTOR_KV = 0;
+
+        public static final double DRIVE_MOTOR_KP = 0;
+        public static final double DRIVE_MOTOR_KI = 0;
+        public static final double DRIVE_MOTOR_KD = 0;
 
         public static final double TURN_MOTOR_KP = 1.8 * 12;
         public static final double TURN_MOTOR_KI = 0;
         public static final double TURN_MOTOR_KD = 0;
+
+        public static final Bounds<Angle> TURN_ANGLE_BOUNDS = Bounds.of(Degrees.zero(), Degrees.of(360));
 
         public static final Voltage MAX_VOLTAGE = Volts.of(12);
 
@@ -67,14 +76,14 @@ public final class SwerveConstants {
         public static final double DRIVE_GEAR_RATIO = 6.12;
         public static final double TURN_GEAR_RATIO = 150.0 / 7;
 
-        public static final DCMotor DRIVE_MOTOR = DCMotor.getKrakenX60Foc(1);
-        public static final DCMotor TURN_MOTOR  = DCMotor.getFalcon500Foc(1);
+        public static final DCMotor DRIVE_MOTOR = DCMotor.getKrakenX60Foc(1).withReduction(DRIVE_GEAR_RATIO);
+        public static final DCMotor TURN_MOTOR  = DCMotor.getFalcon500Foc(1).withReduction(TURN_GEAR_RATIO);
 
         public static final Distance WHEEL_RADIUS = Inches.of(2);
         public static final Distance WHEEL_CIRCUMFERENCE = WHEEL_RADIUS.times(2 * Math.PI);
 
         public static final AngularVelocity DRIVE_MOTOR_MAX_VELOCITY = RotationsPerMinute.of(5784).div(DRIVE_GEAR_RATIO);
-        public static final LinearVelocity MAX_DRIVE_VELOCITY = MetersPerSecond.of(DRIVE_MOTOR_MAX_VELOCITY.in(RadiansPerSecond) * WHEEL_CIRCUMFERENCE.in(Meters));
+        public static final LinearVelocity MAX_DRIVE_VELOCITY = MetersPerSecond.of(DRIVE_MOTOR_MAX_VELOCITY.in(RotationsPerSecond) * WHEEL_CIRCUMFERENCE.in(Meters));
 
         public static final Angle[] OFFSETS = {
             Degrees.of(26.015625 + 90),

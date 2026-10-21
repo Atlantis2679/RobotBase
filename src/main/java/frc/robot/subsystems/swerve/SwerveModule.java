@@ -9,7 +9,6 @@ import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Distance;
 import org.wpilib.units.measure.LinearVelocity;
 
-import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Volts;
 
@@ -23,13 +22,14 @@ import frc.robot.RobotMap.CANBUS.ModuleCanAddresses;
 import frc.robot.subsystems.swerve.io.SwerveModuleIO;
 import frc.robot.subsystems.swerve.io.SwerveModuleIOTalonFX;
 import frc.robot.subsystems.swerve.io.SwerveModuleSim;
-import frc.robot.utils.TunableMeasure;
+import frc.robot.utils.RotationalSensorHelper;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public class SwerveModule implements ComplexTunable {
     private final LogFieldsTable fieldsTable;
     private final SwerveModuleIO io;
     private final int moduleNum;
+    private final RotationalSensorHelper rotationalSensorHelper;
 
     private Distance lastDriveDistance;
     private Distance currentDriveDistance;
@@ -46,9 +46,17 @@ public class SwerveModule implements ComplexTunable {
         fieldsTable.update();
 
         this.moduleNum = moduleNum;
+
+        rotationalSensorHelper = new RotationalSensorHelper(io.turnAngle.get(), OFFSETS[moduleNum]);
+        rotationalSensorHelper.enableContinuousWrap(TURN_ANGLE_BOUNDS);
+
+        currentDriveDistance = getDriveDistance();
+        currentAngle = getAngle();
     }
 
     public void periodic() {
+        rotationalSensorHelper.update(io.turnAngle.get());
+
         lastDriveDistance = currentDriveDistance;
         currentDriveDistance = getDriveDistance();
         lastAngle = currentAngle;
@@ -84,11 +92,11 @@ public class SwerveModule implements ComplexTunable {
         }
 
         fieldsTable.recordOutputMeasure("Turn motor target angle", targetVelocity.angle.getMeasure());
-        io.setDesiredAngle(targetVelocity.angle.getMeasure());
+        io.setDesiredAngle(targetVelocity.angle.getMeasure().plus(rotationalSensorHelper.getOffset())); // Converts back to not offseted angle
     }
 
     public void resetAngle(Angle newAngle) {
-        io.resetAngle(newAngle);
+        rotationalSensorHelper.resetAngle(newAngle);
     }
 
     public void setCoast() {
@@ -138,7 +146,6 @@ public class SwerveModule implements ComplexTunable {
 
     @Override
     public void publishTunable(TunableTable table) {
-        TunableMeasure<Angle> angleToReset = TunableMeasure.of(Degrees.zero(), Degrees);
-        table.publish("Angle To Reset", angleToReset.tunable());
+        table.publish("RotationalSensorHelper", rotationalSensorHelper);
     }
 }

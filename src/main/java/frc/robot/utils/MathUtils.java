@@ -46,14 +46,14 @@ public class MathUtils {
         public final TunableMeasure<M> lowerBound;
         public final TunableMeasure<M> upperBound;
 
-        private Bounds(TunableMeasure<M> lowerBound, TunableMeasure<M> upperBound) {
+        public Bounds(TunableMeasure<M> lowerBound, TunableMeasure<M> upperBound) {
             this.lowerBound = lowerBound;
             this.upperBound = upperBound;
         }
 
         public static <U extends Unit, M extends Measure<U>> Bounds<M> of(M lower, M upper) {
             U unit = lower.unit();
-            return new Bounds<>(TunableMeasure.of(lower, unit), TunableMeasure.of(upper, unit));
+            return new Bounds<>(new TunableMeasure<M>(lower, unit), new TunableMeasure<M>(upper, unit));
         }
 
         public M clamp(M value) {

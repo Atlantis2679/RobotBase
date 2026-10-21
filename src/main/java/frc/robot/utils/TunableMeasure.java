@@ -1,5 +1,6 @@
 package frc.robot.utils;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.wpilib.tunable.TunableBase;
@@ -9,25 +10,24 @@ import org.wpilib.units.Measure;
 import org.wpilib.units.Unit;
 
 public final class TunableMeasure<M extends Measure<?>> implements Supplier<M> {
-    private final TunableDouble raw;
-    private final Unit unit;
+    private M value;
+    private final TunableBase tunable;
 
-    private TunableMeasure(double rawInitial, Unit unit) {
-        this.unit = unit;
-        raw = TunableDouble.createConfig(
-            rawInitial,
-            new TunableConfig().withProperty("unit", "\"" + unit.symbol() + "\""));
-    }
-
-    public static <U extends Unit, M extends Measure<U>> TunableMeasure<M> of(M initial, U unit) {
-        return new TunableMeasure<>(initial.in(unit), unit);
+    @SuppressWarnings("unchecked")
+    public <U extends Unit> TunableMeasure(M initial, U unit) {
+        value = initial;
+        tunable = bind(() -> (Measure<U>) value, v -> value = (M) v, unit);
     }
 
     @SuppressWarnings("unchecked")
-    @Override
-    public M get() {
-        return (M) unit.of(raw.get());
+    public static <U extends Unit, M extends Measure<U>> TunableBase bind(
+            Supplier<M> getter, Consumer<M> setter, U unit) {
+        return TunableDouble.createConfig(
+            () -> getter.get().in(unit),
+            setter == null ? null : v -> setter.accept((M) unit.of(v)),
+            new TunableConfig().withProperty("unit", "\"" + unit.symbol() + "\""));
     }
 
-    public TunableBase tunable() { return raw; }
+    @Override public M get() { return value; }
+    public TunableBase tunable() { return tunable; }
 }

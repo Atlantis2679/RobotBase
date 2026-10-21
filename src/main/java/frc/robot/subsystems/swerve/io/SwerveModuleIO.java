@@ -46,8 +46,6 @@ public abstract class SwerveModuleIO extends IOBase {
 
     public abstract void setDesiredAngle(Angle angle);
 
-    public abstract void resetAngle(Angle newAngle);
-
     public abstract void setCoast();
 
     public abstract void setTurnPID(PIDController pidController);

@@ -87,7 +87,7 @@ public class RotationalSensorHelper implements ComplexTunable {
     @Override
     public void publishTunable(TunableTable table) {
         table.publish("Wrap Bounds", wrapBounds);
-        table.publish("Offset", TunableMeasure.of(getOffset(), Degrees).tunable());
-        table.publish("Angle", TunableMeasure.of(getAngle(), Degrees).tunable());
+        table.publish("Offset", TunableMeasure.bind(this::getOffset, this::setOffset, Degrees));
+        table.publish("Angle", TunableMeasure.bind(this::getAngle, this::resetAngle, Degrees));
     }
 }

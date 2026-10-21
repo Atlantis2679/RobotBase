@@ -199,7 +199,7 @@ public class Swerve implements Mechanism, ComplexTunable {
         table.publish("Yaw RotationalSensorHelper", gyroYaw);
 
         table.publish("Reset Modules Angle", (resetTable) -> {
-            TunableMeasure<Angle> angleToReset = TunableMeasure.of(Degrees.zero(), Degrees);
+            TunableMeasure<Angle> angleToReset = new TunableMeasure<Angle>(Degrees.zero(), Degrees);
             resetTable.publish("Angle to reset", angleToReset.tunable());
             resetTable.publish("Reset", new TunableCommand(Command.noRequirements((coroutine) -> {
                 Angle newAngle = angleToReset.get();
