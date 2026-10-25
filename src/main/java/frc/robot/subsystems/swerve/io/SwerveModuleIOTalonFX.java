@@ -42,9 +42,9 @@ import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
 
 public class SwerveModuleIOTalonFX extends SwerveModuleIO {
-    private final TalonFX driveMotor;
-    private final TalonFX turnMotor;
-    private final CANcoder canCoder;
+    protected final TalonFX driveMotor;
+    protected final TalonFX turnMotor;
+    protected final CANcoder canCoder;
 
     private final StatusSignal<Angle> drivePosition;
     private final StatusSignal<AngularVelocity> driveVelocity;

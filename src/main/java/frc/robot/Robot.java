@@ -13,12 +13,17 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+import org.wpilib.backend.NetworkTablesTunableBackend;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Scheduler;
+import org.wpilib.networktables.NetworkTableInstance;
 import org.wpilib.system.Filesystem;
+import org.wpilib.system.Timer;
+import org.wpilib.tunable.TunableRegistry;
 
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.periodicalerts.PeriodicAlertsManager;
+import team2679.atlantiskit.tunables.LoggedTunableBackend;
 
 public class Robot extends LoggedRobot {
     private Command autonomousCommand;
@@ -82,13 +87,15 @@ public class Robot extends LoggedRobot {
             Logger.addDataReceiver(new NT4Publisher() {
                 @Override
                 public void putTable(LogTable table) {
-                    if (table.get("RealOutputs/Tuning Mode", false))
+                    // if (table.get("RealOutputs/Tuning Mode", false))
                         super.putTable(table);
                 }
             });
         }
 
         Logger.start();
+
+        TunableRegistry.registerBackend("/", new LoggedTunableBackend(new NetworkTablesTunableBackend(NetworkTableInstance.getDefault(), "/Tunables")));
     }
 
     private boolean getIsReplay() {

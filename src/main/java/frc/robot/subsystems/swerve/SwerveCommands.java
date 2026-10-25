@@ -9,8 +9,8 @@ import static org.wpilib.units.Units.MetersPerSecond;
 import static org.wpilib.units.Units.Second;
 
 import java.util.function.BooleanSupplier;
-import java.util.function.DoubleFunction;
 import java.util.function.DoubleSupplier;
+import java.util.function.Function;
 
 import org.wpilib.command3.Command;
 import org.wpilib.math.geometry.Rotation2d;
@@ -74,7 +74,7 @@ public class SwerveCommands {
             t -> SysId.STEP_CURRENT.times(sign));
     }
 
-    private Command sysIdTest(State state, DoubleFunction<Current> currentAtTime) {
+    private Command sysIdTest(State state, Function<Double, Current> currentAtTime) {
         return swerve.run(coroutine -> {
             Timer timer = Timer.createStarted();
             while (!timer.hasElapsed(SysId.TIMEOUT)) {

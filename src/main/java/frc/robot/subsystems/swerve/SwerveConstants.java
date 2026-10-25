@@ -9,6 +9,7 @@ import com.pathplanner.lib.controllers.PathFollowingController;
 import frc.robot.utils.MathUtils.Bounds;
 
 import static frc.robot.Constants.ROBOT_PERIOD;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.DRIVE_GEAR_RATIO;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.DegreesPerSecondPerSecond;
@@ -81,8 +82,8 @@ public final class SwerveConstants {
         public static final double DRIVE_GEAR_RATIO = 6.12;
         public static final double TURN_GEAR_RATIO = 150.0 / 7;
 
-        public static final DCMotor DRIVE_MOTOR = DCMotor.getKrakenX60Foc(1).withReduction(DRIVE_GEAR_RATIO);
-        public static final DCMotor TURN_MOTOR  = DCMotor.getFalcon500Foc(1).withReduction(TURN_GEAR_RATIO);
+        public static final DCMotor DRIVE_MOTOR = DCMotor.getKrakenX60Foc(1);
+        public static final DCMotor TURN_MOTOR  = DCMotor.getFalcon500Foc(1);
 
         public static final Distance WHEEL_RADIUS = Inches.of(2);
         public static final Distance WHEEL_CIRCUMFERENCE = WHEEL_RADIUS.times(2 * Math.PI);
@@ -136,7 +137,7 @@ public final class SwerveConstants {
             Modules.WHEEL_RADIUS,
             Modules.MAX_DRIVE_VELOCITY,
             FRICTION_WITH_CARPET,
-            Modules.DRIVE_MOTOR,
+            Modules.DRIVE_MOTOR.withReduction(DRIVE_GEAR_RATIO),
             Modules.DRIVE_SUPPLY_CURRENT_LIMIT,
             1);
 

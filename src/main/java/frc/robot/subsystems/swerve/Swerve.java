@@ -127,7 +127,7 @@ public class Swerve implements Mechanism, ComplexTunable {
 
         SwerveModuleVelocity[] moduleVelocitys = kinematics.toSwerveModuleVelocities(robotRelativeChassisVelocities);
 
-        SwerveDriveKinematics.desaturateWheelVelocities(moduleVelocitys, Modules.MAX_DRIVE_VELOCITY);
+        moduleVelocitys = SwerveDriveKinematics.desaturateWheelVelocities(moduleVelocitys, Modules.MAX_DRIVE_VELOCITY);
 
         setModulesVelocities(moduleVelocitys, true, true, useVoltage);
     }
