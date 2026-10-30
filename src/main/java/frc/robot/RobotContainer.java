@@ -14,6 +14,7 @@ import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveCommands;
 import frc.robot.subsystems.swerve.SwerveDriverController;
 import frc.robot.utils.NaturalXboxController;
+import frc.robot.utils.TunableCommand;
 
 public class RobotContainer {
     Swerve swerve = new Swerve();
@@ -39,6 +40,7 @@ public class RobotContainer {
         
         swerve.setDefaultCommand(driveCommand);
         Tunables.publish("Swerve/Drive Command", driveCommand);
+        Tunables.publish("Swerve/Sysid", new TunableCommand(swerveCommands.sysId(driverController.a())));
     }
 
     private void configureOperatorBindings() {

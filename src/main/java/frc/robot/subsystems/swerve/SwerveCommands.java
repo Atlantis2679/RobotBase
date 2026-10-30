@@ -29,8 +29,15 @@ public class SwerveCommands {
     public SwerveCommands(Swerve swerve) {
         this.swerve = swerve;
         sysIdRoutine = new SysIdRoutine(
-            new SysIdRoutine.Config(Volts.per(Second).of(SysId.RAMP_RATE.in(Amps.per(Second))), Volts.of(SysId.STEP_CURRENT.in(Amps)), SysId.TIMEOUT, (state) -> SignalLogger.writeString("swerve-sysid-state", state.toString())),
-            new SysIdMechanism((current) -> swerve.runDriveCharacterization(Amps.of(current.in(Volts))), null, swerve));
+            new SysIdRoutine.Config(
+                Volts.per(Second).of(SysId.RAMP_RATE.in(Amps.per(Second))),
+                Volts.of(SysId.STEP_CURRENT.in(Amps)),
+                SysId.TIMEOUT,
+                (state) -> SignalLogger.writeString("swerve-sysid-state",
+                state.toString())),
+            new SysIdMechanism((current) -> swerve.runDriveCharacterization(Amps.of(current.in(Volts))),
+                null,
+                swerve));
     }
 
     public SwerveDriverController driverController(DoubleSupplier forwardSupplier, DoubleSupplier sidewaysSupplier,
@@ -64,9 +71,5 @@ public class SwerveCommands {
 
     public Command sysId(BooleanSupplier nextStage) {
         return SysIdHelper.sysIdSequence("Swerve SysId", sysIdRoutine, nextStage);
-    }
-
-    public Command stop() {
-        return swerve.runRepeatedly(swerve::stop).named("Stop");
     }
 }
