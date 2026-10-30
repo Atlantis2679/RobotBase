@@ -2,7 +2,6 @@ package frc.robot.subsystems.poseestimation;
 
 import static frc.robot.subsystems.poseestimation.PoseEstimatorConstants.*;
 import static org.wpilib.units.Units.Degrees;
-import static org.wpilib.units.Units.Radians;
 import static org.wpilib.units.Units.Seconds;
 
 import java.util.ArrayList;
@@ -27,7 +26,6 @@ import org.wpilib.math.util.Nat;
 import org.wpilib.system.Timer;
 import org.wpilib.tunable.ComplexTunable;
 import org.wpilib.tunable.TunableTable;
-import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.Time;
 
 import frc.robot.RobotContainer;
@@ -49,7 +47,7 @@ public class PoseEstimator implements ComplexTunable {
     private TunableTrustLevel odometryTrustLevel = new TunableTrustLevel(ODOMETRY_STD_DEVS);
 
     private RotationalSensorHelper yawRotationalSensorHelper = new RotationalSensorHelper(Degrees.zero());
-    private Optional<Angle> lastGyroAngle = Optional.empty();
+    private Optional<Rotation2d> lastGyroAngle = Optional.empty();
 
     private Time lastResetTimestamp = Seconds.zero();
 
@@ -62,12 +60,13 @@ public class PoseEstimator implements ComplexTunable {
     public void addOdometryMeasurement(OdometryMeasurement measurement) {
         Twist2d twist2d = measurement.kinematics.toTwist2d(measurement.modulePositionsDelta);
         if (measurement.gyroAngle.isPresent()) {
+            Rotation2d gyroAngle = measurement.gyroAngle.get();
             if (lastGyroAngle.isEmpty()) {
-            yawRotationalSensorHelper.setOffset(measurement.gyroAngle.get().minus(odometryPose.getRotation()).getMeasure());
+                yawRotationalSensorHelper.setOffset(gyroAngle.minus(odometryPose.getRotation()).getMeasure());
             } else {
-            twist2d.dtheta = measurement.gyroAngle.get().getMeasure().minus(lastGyroAngle.get()).in(Radians);
+                twist2d.dtheta = gyroAngle.minus(lastGyroAngle.get()).getRadians();
             }
-            lastGyroAngle = Optional.of(measurement.gyroAngle.get().getMeasure());
+            lastGyroAngle = Optional.of(gyroAngle);
         } else {
             lastGyroAngle = Optional.empty();
         }

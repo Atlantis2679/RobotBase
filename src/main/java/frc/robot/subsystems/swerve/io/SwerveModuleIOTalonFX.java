@@ -172,7 +172,7 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
         canCoderAbsolutePosition = canCoder.getAbsolutePosition();
 
         BaseStatusSignal.setUpdateFrequencyForAll(250.0, drivePosition, driveVelocity, turnPosition);
-        BaseStatusSignal.setUpdateFrequencyForAll(50.0, canCoderAbsolutePosition, driveTorqueCurrent, turnTorqueCurrent);
+        BaseStatusSignal.setUpdateFrequencyForAll(50.0, driveTorqueCurrent, turnTorqueCurrent);
 
         AlertsFactory.phoenixMotor(PeriodicAlertsGroup.defaultInstance,
                 () -> driveSignalsStatus, moduleAlertPrefix + "Drive Motor Signals");
@@ -189,7 +189,7 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
 
     @Override
     protected void periodicBeforeFields() {
-        driveSignalsStatus = BaseStatusSignal.refreshAll(drivePosition, driveVelocity, driveTorqueCurrent, turnTorqueCurrent);
+        driveSignalsStatus = BaseStatusSignal.refreshAll(drivePosition, driveVelocity, driveTorqueCurrent);
         turnSignalsStatus = BaseStatusSignal.refreshAll(turnPosition, turnTorqueCurrent);
         canCoderSignalsStatus = BaseStatusSignal.refreshAll(canCoderAbsolutePosition);
     }
