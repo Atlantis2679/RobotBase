@@ -18,7 +18,6 @@ import org.wpilib.command3.Command;
 import org.wpilib.command3.Scheduler;
 import org.wpilib.networktables.NetworkTableInstance;
 import org.wpilib.system.Filesystem;
-import org.wpilib.system.Timer;
 import org.wpilib.tunable.TunableRegistry;
 
 import team2679.atlantiskit.logfields.LogFieldsTable;

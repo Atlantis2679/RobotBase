@@ -82,8 +82,11 @@ public final class SwerveConstants {
         public static final double DRIVE_GEAR_RATIO = 6.12;
         public static final double TURN_GEAR_RATIO = 150.0 / 7;
 
-        public static final DCMotor DRIVE_MOTOR = DCMotor.getKrakenX60Foc(1);
-        public static final DCMotor TURN_MOTOR  = DCMotor.getFalcon500Foc(1);
+        public static final DCMotor DRIVE_MOTOR_GEARBOX = DCMotor.getKrakenX60Foc(1); // Without gear reduction!
+        public static final DCMotor TURN_MOTOR_GEARBOX  = DCMotor.getFalcon500Foc(1); // Without gear reduction!
+
+        public static final MomentOfInertia DRIVE_MOMENT = KilogramSquareMeters.of(0.04);
+        public static final MomentOfInertia TURN_MOMENT = KilogramSquareMeters.of(0.01);
 
         public static final Distance WHEEL_RADIUS = Inches.of(2);
         public static final Distance WHEEL_CIRCUMFERENCE = WHEEL_RADIUS.times(2 * Math.PI);
@@ -137,7 +140,7 @@ public final class SwerveConstants {
             Modules.WHEEL_RADIUS,
             Modules.MAX_DRIVE_VELOCITY,
             FRICTION_WITH_CARPET,
-            Modules.DRIVE_MOTOR.withReduction(DRIVE_GEAR_RATIO),
+            Modules.DRIVE_MOTOR_GEARBOX.withReduction(DRIVE_GEAR_RATIO),
             Modules.DRIVE_SUPPLY_CURRENT_LIMIT,
             1);
 
