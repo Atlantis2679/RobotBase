@@ -102,7 +102,7 @@ public final class SwerveConstants {
             Degrees.of(-117.24609375 + 270),
         };
 
-        public static final Current DRIVE_STATOR_CURRENT_LIMIT = Amps.of(90);
+        public static final Current DRIVE_STATOR_CURRENT_LIMIT = Amps.of(60);
 
         public static final Current DRIVE_SUPPLY_CURRENT_LIMIT = Amps.of(60);
         public static final Current DRIVE_SUPPLY_CURRENT_LOWER_LIMIT = Amps.of(30);

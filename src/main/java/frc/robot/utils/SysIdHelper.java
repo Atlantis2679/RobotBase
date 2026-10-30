@@ -16,6 +16,7 @@ public class SysIdHelper {
             for (Command stage : new Command[] {
                     r.quasistatic(Direction.FORWARD), r.quasistatic(Direction.REVERSE),
                     r.dynamic(Direction.FORWARD), r.dynamic(Direction.REVERSE)}) {
+                co.waitUntil(() -> !run.getAsBoolean()); 
                 co.waitUntil(run);
                 co.await(stage.until(() -> !run.getAsBoolean()).named(stage.name()));
             }

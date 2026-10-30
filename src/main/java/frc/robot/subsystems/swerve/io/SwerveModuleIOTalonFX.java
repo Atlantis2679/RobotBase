@@ -184,7 +184,6 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
 
         driveMotor.optimizeBusUtilization();
         turnMotor.optimizeBusUtilization();
-        canCoder.optimizeBusUtilization();
     }
 
     @Override
