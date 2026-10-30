@@ -1,6 +1,37 @@
 package frc.robot.subsystems.swerve.io;
 
-import static frc.robot.subsystems.swerve.SwerveConstants.Modules.*;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.DRIVE_GEAR_RATIO;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.DRIVE_MOTOR_KA;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.DRIVE_MOTOR_KD;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.DRIVE_MOTOR_KI;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.DRIVE_MOTOR_KP;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.DRIVE_MOTOR_KS;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.DRIVE_MOTOR_KV;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.DRIVE_STATOR_CURRENT_LIMIT;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.DRIVE_SUPPLY_CURRENT_LIMIT;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.DRIVE_SUPPLY_CURRENT_LOWER_LIMIT;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.DRIVE_SUPPLY_CURRENT_LOWER_TIME;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.TURN_GEAR_RATIO;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.TURN_MOTOR_KD;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.TURN_MOTOR_KI;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.TURN_MOTOR_KP;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.TURN_STATOR_CURRENT_LIMIT;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.WHEEL_CIRCUMFERENCE;
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.getModuleName;
+import static org.wpilib.units.Units.Amps;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.Rotations;
+import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
+import static org.wpilib.units.Units.Seconds;
+
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.LinearVelocity;
+import org.wpilib.units.measure.Voltage;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
@@ -21,21 +52,6 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
-import static org.wpilib.units.Units.Amps;
-import static org.wpilib.units.Units.Meters;
-import static org.wpilib.units.Units.MetersPerSecond;
-import static org.wpilib.units.Units.MetersPerSecondPerSecond;
-import static org.wpilib.units.Units.Rotations;
-import static org.wpilib.units.Units.RotationsPerSecond;
-import static org.wpilib.units.Units.Seconds;
-
-import org.wpilib.units.measure.Angle;
-import org.wpilib.units.measure.AngularVelocity;
-import org.wpilib.units.measure.Current;
-import org.wpilib.units.measure.Distance;
-import org.wpilib.units.measure.LinearVelocity;
-import org.wpilib.units.measure.Voltage;
-
 import frc.robot.RobotMap.CANBUS.ModuleCanAddresses;
 import frc.robot.utils.AlertsFactory;
 import team2679.atlantiskit.logfields.LogFieldsTable;
@@ -51,6 +67,7 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
     private final StatusSignal<Angle> turnPosition;
     private final StatusSignal<Current> driveTorqueCurrent;
     private final StatusSignal<Current> turnTorqueCurrent;
+    private final StatusSignal<Angle> canCoderAbsolutePosition;
     
     private final VoltageOut driveVoltageControl = new VoltageOut(0);
     private final VelocityTorqueCurrentFOC driveVelocityControl = new VelocityTorqueCurrentFOC(0).withSlot(0);
@@ -61,6 +78,10 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
     private StatusCode driveMotorStatus;
     private StatusCode turnMotorStatus;
     private StatusCode canCoderStatus;
+
+    private StatusCode driveSignalsStatus = StatusCode.OK;
+    private StatusCode turnSignalsStatus = StatusCode.OK;
+    private StatusCode canCoderSignalsStatus = StatusCode.OK;
 
     private final Slot0Configs turnSlotConfigs;
 
@@ -83,10 +104,13 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
         driveMotorConfig.CurrentLimits.SupplyCurrentLowerLimit = DRIVE_SUPPLY_CURRENT_LOWER_LIMIT.in(Amps);
         driveMotorConfig.CurrentLimits.SupplyCurrentLowerTime = DRIVE_SUPPLY_CURRENT_LOWER_TIME.in(Seconds);
 
+        driveMotorConfig.TorqueCurrent.PeakForwardTorqueCurrent =  DRIVE_STATOR_CURRENT_LIMIT.in(Amps);
+        driveMotorConfig.TorqueCurrent.PeakReverseTorqueCurrent = -DRIVE_STATOR_CURRENT_LIMIT.in(Amps);
+
         Slot0Configs driveSlotConfig = driveMotorConfig.Slot0;
         driveSlotConfig.kS = DRIVE_MOTOR_KS.in(Amps);
-        driveSlotConfig.kV = DRIVE_MOTOR_KV.in(Amps.per(MetersPerSecond)) * WHEEL_CIRCUMFERENCE.in(Meters);
-        driveSlotConfig.kA = DRIVE_MOTOR_KA.in(Amps.per(MetersPerSecondPerSecond)) * WHEEL_CIRCUMFERENCE.in(Meters);;
+        driveSlotConfig.kV = DRIVE_MOTOR_KV.in(Amps.per(RotationsPerSecond));
+        driveSlotConfig.kA = DRIVE_MOTOR_KA.in(Amps.per(RotationsPerSecondPerSecond));
 
         driveSlotConfig.kP = DRIVE_MOTOR_KP;
         driveSlotConfig.kI = DRIVE_MOTOR_KI;
@@ -116,9 +140,18 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
 
         canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
 
-        driveMotorStatus = driveMotor.getConfigurator().apply(driveMotorConfig);
-        turnMotorStatus = turnMotor.getConfigurator().apply(turnMotorConfig);
-        canCoderStatus = canCoder.getConfigurator().apply(canCoderConfig);
+        for (int i = 0; i < 5; i++) {
+            driveMotorStatus = driveMotor.getConfigurator().apply(driveMotorConfig);
+            if (driveMotorStatus.isOK()) break;
+        }
+        for (int i = 0; i < 5; i++) {
+            turnMotorStatus = turnMotor.getConfigurator().apply(turnMotorConfig);
+            if (turnMotorStatus.isOK()) break;
+        }
+        for (int i = 0; i < 5; i++) {
+            canCoderStatus = canCoder.getConfigurator().apply(canCoderConfig);
+            if (canCoderStatus.isOK()) break;
+        }
         
         driveMotor.setPosition(0);
 
@@ -136,9 +169,19 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
         turnPosition = turnMotor.getPosition();
         driveTorqueCurrent = driveMotor.getTorqueCurrent();
         turnTorqueCurrent = turnMotor.getTorqueCurrent();
+        canCoderAbsolutePosition = canCoder.getAbsolutePosition();
 
         BaseStatusSignal.setUpdateFrequencyForAll(250.0, drivePosition, driveVelocity, turnPosition);
-        BaseStatusSignal.setUpdateFrequencyForAll(50.0, driveTorqueCurrent, turnTorqueCurrent);
+        BaseStatusSignal.setUpdateFrequencyForAll(50.0, canCoderAbsolutePosition, driveTorqueCurrent, turnTorqueCurrent);
+
+        AlertsFactory.phoenixMotor(PeriodicAlertsGroup.defaultInstance,
+                () -> driveSignalsStatus, moduleAlertPrefix + "Drive Motor Signals");
+        AlertsFactory.phoenixMotor(PeriodicAlertsGroup.defaultInstance,
+                () -> turnSignalsStatus, moduleAlertPrefix + "Turn Motor Signals");
+        AlertsFactory.phoenixMotor(PeriodicAlertsGroup.defaultInstance,
+                () -> canCoderSignalsStatus, moduleAlertPrefix + "Can Coder Signals");
+
+
         driveMotor.optimizeBusUtilization();
         turnMotor.optimizeBusUtilization();
         canCoder.optimizeBusUtilization();
@@ -146,7 +189,9 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
 
     @Override
     protected void periodicBeforeFields() {
-        BaseStatusSignal.refreshAll(drivePosition, driveVelocity, turnPosition, driveTorqueCurrent, turnTorqueCurrent);
+        driveSignalsStatus = BaseStatusSignal.refreshAll(drivePosition, driveVelocity, driveTorqueCurrent, turnTorqueCurrent);
+        turnSignalsStatus = BaseStatusSignal.refreshAll(turnPosition, turnTorqueCurrent);
+        canCoderSignalsStatus = BaseStatusSignal.refreshAll(canCoderAbsolutePosition);
     }
 
     @Override

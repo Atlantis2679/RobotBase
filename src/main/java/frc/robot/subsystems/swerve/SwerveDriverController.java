@@ -1,5 +1,16 @@
 package frc.robot.subsystems.swerve;
 
+import static frc.robot.subsystems.swerve.SwerveConstants.DriverController.ACCELERATION_LIMIT;
+import static frc.robot.subsystems.swerve.SwerveConstants.DriverController.ANGULAR_ACCELERATION_LIMIT;
+import static frc.robot.subsystems.swerve.SwerveConstants.DriverController.MAX_ANGULAR_VELOCITY;
+import static frc.robot.subsystems.swerve.SwerveConstants.DriverController.MAX_LINEAR_VELOCITY;
+import static frc.robot.subsystems.swerve.SwerveConstants.DriverController.SENSITIVE_ROTATION_MULTIPLIER;
+import static frc.robot.subsystems.swerve.SwerveConstants.DriverController.SENSITIVE_TRANSLATION_MULTIPLIER;
+import static org.wpilib.units.Units.DegreesPerSecond;
+import static org.wpilib.units.Units.DegreesPerSecondPerSecond;
+import static org.wpilib.units.Units.MetersPerSecond;
+import static org.wpilib.units.Units.MetersPerSecondPerSecond;
+
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -8,17 +19,15 @@ import org.wpilib.command3.Command;
 import org.wpilib.command3.Coroutine;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.math.filter.SlewRateLimiter;
+import org.wpilib.math.geometry.Translation2d;
+import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.tunable.ComplexTunable;
 import org.wpilib.tunable.Selectable;
 import org.wpilib.tunable.TunableTable;
 
+import frc.robot.RobotContainer;
+import frc.robot.utils.SlewRateLimiter2d;
 import frc.robot.utils.TunableCommand;
-
-import static frc.robot.subsystems.swerve.SwerveConstants.DriverController.*;
-import static org.wpilib.units.Units.DegreesPerSecond;
-import static org.wpilib.units.Units.DegreesPerSecondPerSecond;
-import static org.wpilib.units.Units.MetersPerSecond;
-import static org.wpilib.units.Units.MetersPerSecondPerSecond;
 
 public class SwerveDriverController implements Command, ComplexTunable {
     private final Swerve swerve;
@@ -32,8 +41,7 @@ public class SwerveDriverController implements Command, ComplexTunable {
     private final Selectable<Double> linearVelocityMultiplierSelect = new Selectable<>();
     private final Selectable<Double> rotationVelocityMultiplierSelect = new Selectable<>();
 
-    private final SlewRateLimiter forwardSlewRateLimiter = new SlewRateLimiter(ACCELERATION_LIMIT.in(MetersPerSecondPerSecond));
-    private final SlewRateLimiter sidewaysSlewRateLimiter = new SlewRateLimiter(ACCELERATION_LIMIT.in(MetersPerSecondPerSecond));
+    private final SlewRateLimiter2d translationSlewRateLimiter = new SlewRateLimiter2d(ACCELERATION_LIMIT.in(MetersPerSecondPerSecond));
     private final SlewRateLimiter rotationSlewRateLimiter = new SlewRateLimiter(ANGULAR_ACCELERATION_LIMIT.in(DegreesPerSecondPerSecond));
 
     public SwerveDriverController(Swerve swerve, DoubleSupplier forwardSupplier, DoubleSupplier sidewaysSupplier,
@@ -61,7 +69,16 @@ public class SwerveDriverController implements Command, ComplexTunable {
 
     @Override
     public void run(Coroutine coroutine) {
+        boolean wasFieldRelative = isFieldRelative.getAsBoolean();
+        resetLimiters(wasFieldRelative);
+
         while (true) {
+            boolean fieldRelative = isFieldRelative.getAsBoolean();
+            if (fieldRelative != wasFieldRelative) {
+                resetLimiters(fieldRelative);
+                wasFieldRelative = fieldRelative;
+            }
+
             double precentageForward = forwardSupplier.getAsDouble() * linearVelocityMultiplierSelect.getSelected();
             double precentageSideways = sidewaysSupplier.getAsDouble() * linearVelocityMultiplierSelect.getSelected();
             double precentageRotation = rotationsSupplier.getAsDouble() * rotationVelocityMultiplierSelect.getSelected();
@@ -72,15 +89,28 @@ public class SwerveDriverController implements Command, ComplexTunable {
                 precentageRotation *= SENSITIVE_ROTATION_MULTIPLIER;
             }
 
+            Translation2d translation = translationSlewRateLimiter.calculate(
+                new Translation2d(precentageForward * MAX_LINEAR_VELOCITY.in(MetersPerSecond), precentageSideways * MAX_LINEAR_VELOCITY.in(MetersPerSecond)));
+            double rotation = rotationSlewRateLimiter.calculate(precentageRotation * MAX_ANGULAR_VELOCITY.in(DegreesPerSecond));
+
             swerve.drive(
-                MetersPerSecond.of(forwardSlewRateLimiter.calculate(precentageForward * MAX_LINEAR_VELOCITY.in(MetersPerSecond))),
-                MetersPerSecond.of(sidewaysSlewRateLimiter.calculate(precentageSideways * MAX_LINEAR_VELOCITY.in(MetersPerSecond))),
-                DegreesPerSecond.of(rotationSlewRateLimiter.calculate(precentageRotation * MAX_ANGULAR_VELOCITY.in(DegreesPerSecond))),
-                isFieldRelative.getAsBoolean(),
+                MetersPerSecond.of(translation.getX()),
+                MetersPerSecond.of(translation.getY()),
+                DegreesPerSecond.of(rotation),
+                fieldRelative,
                 false);
             
             coroutine.yield();
         }
+    }
+
+    private void resetLimiters(boolean fieldRelative) {
+        ChassisVelocities v = fieldRelative
+            ? swerve.getFieldRelativeChassisVelocities()
+            : swerve.getRobotRelativeChassisVelocities();
+        double flip = fieldRelative && RobotContainer.isRedAlliance() ? -1 : 1; // undo drive()'s red flip
+        translationSlewRateLimiter.reset(new Translation2d(v.vx * flip, v.vy * flip));
+        rotationSlewRateLimiter.reset(Math.toDegrees(v.omega));
     }
 
     @Override

@@ -22,14 +22,15 @@ import static org.wpilib.units.Units.MetersPerSecondPerSecond;
 import static org.wpilib.units.Units.RadiansPerSecond;
 import static org.wpilib.units.Units.RotationsPerMinute;
 import static org.wpilib.units.Units.RotationsPerSecond;
+import static org.wpilib.units.Units.RotationsPerSecondPerSecond;
 import static org.wpilib.units.Units.Seconds;
 import static org.wpilib.units.Units.Volts;
 
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.system.DCMotor;
+import org.wpilib.units.AngularAccelerationUnit;
+import org.wpilib.units.AngularVelocityUnit;
 import org.wpilib.units.CurrentUnit;
-import org.wpilib.units.LinearAccelerationUnit;
-import org.wpilib.units.LinearVelocityUnit;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularAcceleration;
 import org.wpilib.units.measure.AngularVelocity;
@@ -62,8 +63,8 @@ public final class SwerveConstants {
         }
 
         public static final Current DRIVE_MOTOR_KS = Amps.of(0);
-        public static final Per<CurrentUnit, LinearVelocityUnit> DRIVE_MOTOR_KV = Amps.per(MetersPerSecond).ofNative(0);
-        public static final Per<CurrentUnit, LinearAccelerationUnit> DRIVE_MOTOR_KA = Amps.per(MetersPerSecondPerSecond).ofNative(0);
+        public static final Per<CurrentUnit, AngularVelocityUnit> DRIVE_MOTOR_KV = Amps.per(RotationsPerSecond).ofNative(0);
+        public static final Per<CurrentUnit, AngularAccelerationUnit> DRIVE_MOTOR_KA = Amps.per(RotationsPerSecondPerSecond).ofNative(0);
 
         public static final double DRIVE_MOTOR_KP = 0;
         public static final double DRIVE_MOTOR_KI = 0;
@@ -91,8 +92,8 @@ public final class SwerveConstants {
         public static final Distance WHEEL_RADIUS = Inches.of(2);
         public static final Distance WHEEL_CIRCUMFERENCE = WHEEL_RADIUS.times(2 * Math.PI);
 
-        public static final AngularVelocity DRIVE_MOTOR_MAX_VELOCITY = RotationsPerMinute.of(5784).div(DRIVE_GEAR_RATIO);
-        public static final LinearVelocity MAX_DRIVE_VELOCITY = MetersPerSecond.of(DRIVE_MOTOR_MAX_VELOCITY.in(RotationsPerSecond) * WHEEL_CIRCUMFERENCE.in(Meters));
+        public static final LinearVelocity DRIVE_FREE_SPEED = MetersPerSecond.of(RotationsPerMinute.of(5784).div(DRIVE_GEAR_RATIO).in(RotationsPerSecond) * WHEEL_CIRCUMFERENCE.in(Meters));
+        public static final LinearVelocity MAX_DRIVE_VELOCITY = MetersPerSecond.of(5);
 
         public static final Angle[] OFFSETS = {
             Degrees.of(26.015625 + 90),
@@ -101,7 +102,7 @@ public final class SwerveConstants {
             Degrees.of(-117.24609375 + 270),
         };
 
-        public static final Current DRIVE_STATOR_CURRENT_LIMIT = Amps.of(60);
+        public static final Current DRIVE_STATOR_CURRENT_LIMIT = Amps.of(90);
 
         public static final Current DRIVE_SUPPLY_CURRENT_LIMIT = Amps.of(60);
         public static final Current DRIVE_SUPPLY_CURRENT_LOWER_LIMIT = Amps.of(30);
@@ -124,9 +125,9 @@ public final class SwerveConstants {
     };
 
     public static final class SysId {
-        public static final Velocity<CurrentUnit> RAMP_RATE = Amps.of(2).per(Seconds);
-        public static final Current STEP_CURRENT = Amps.of(15);
-        public static final Time TIMEOUT = Seconds.of(2.5);
+        public static final Velocity<CurrentUnit> RAMP_RATE = Amps.of(8).per(Seconds);
+        public static final Current STEP_CURRENT = Amps.of(12);
+        public static final Time TIMEOUT = Seconds.of(2);
     }
 
     public static final Time GYRO_CONNECTED_DEBOUNCE_TIME = ROBOT_PERIOD.times(5);
@@ -141,7 +142,7 @@ public final class SwerveConstants {
             Modules.MAX_DRIVE_VELOCITY,
             FRICTION_WITH_CARPET,
             Modules.DRIVE_MOTOR_GEARBOX.withReduction(DRIVE_GEAR_RATIO),
-            Modules.DRIVE_SUPPLY_CURRENT_LIMIT,
+            Modules.DRIVE_STATOR_CURRENT_LIMIT,
             1);
 
         public static final RobotConfig ROBOT_CONFIG = new RobotConfig(

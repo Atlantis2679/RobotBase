@@ -127,10 +127,6 @@ public class SwerveModule implements ComplexTunable {
         return new SwerveModuleVelocity(getDriveVelocity(), new Rotation2d(getAngle()));
     }
 
-    public Current getCurrent() {
-        return io.driveCurrent.get();
-    }
-    
     public LinearVelocity getDriveVelocity() {
         return io.driveVelocity.get();
     }

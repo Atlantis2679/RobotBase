@@ -10,14 +10,14 @@ import org.wpilib.driverstation.RobotState;
 import com.ctre.phoenix6.SignalLogger;
 
 public class SysIdHelper {
-    public static Command sysIdSequence(String name, SysIdRoutine r, BooleanSupplier nextStage) {
+    public static Command sysIdSequence(String name, SysIdRoutine r, BooleanSupplier run) {
         return Command.noRequirements(co -> {
             SignalLogger.start();
             for (Command stage : new Command[] {
                     r.quasistatic(Direction.FORWARD), r.quasistatic(Direction.REVERSE),
                     r.dynamic(Direction.FORWARD), r.dynamic(Direction.REVERSE)}) {
-                co.waitUntil(nextStage);
-                co.await(stage.until(nextStage).named(stage.name()));
+                co.waitUntil(run);
+                co.await(stage.until(() -> !run.getAsBoolean()).named(stage.name()));
             }
         })
         .until(RobotState::isDisabled)
