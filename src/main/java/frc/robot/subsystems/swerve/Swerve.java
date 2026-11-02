@@ -216,7 +216,7 @@ public class Swerve implements Mechanism, ComplexTunable {
                 Angle newAngle = angleToReset.get();
                 for (SwerveModule module : modules)
                     module.resetAngle(newAngle);
-            }).named("Reset ")));
+            }).named("Reset modules angle")));
         });
     }
 }

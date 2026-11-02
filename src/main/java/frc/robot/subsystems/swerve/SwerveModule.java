@@ -61,25 +61,25 @@ public class SwerveModule implements ComplexTunable {
 
     public void setTargetVelocity(SwerveModuleVelocity targetVelocity, boolean optimize, boolean preventJittering,
             boolean useVoltage) {
-        Rotation2d currentAngle = new Rotation2d(getAngle());
-        if (optimize) targetVelocity = targetVelocity.optimize(currentAngle).cosineScale(currentAngle);
-
-        LinearVelocity targetStateVelocity = MetersPerSecond.of(targetVelocity.velocity);
-
         if (preventJittering
-                && targetStateVelocity.abs(MetersPerSecond) < MAX_DRIVE_VELOCITY.times(PREVENT_JITTERING_MULTIPLIER).abs(MetersPerSecond)) {
+                && Math.abs(targetVelocity.velocity) < MAX_DRIVE_VELOCITY.times(PREVENT_JITTERING_MULTIPLIER).abs(MetersPerSecond)) {
             if (useVoltage) io.setDriveVoltage(Volts.zero());
             else io.setDriveVelocity(MetersPerSecond.zero());
             return;
         }
 
+        Rotation2d currentAngle = new Rotation2d(getAngle());
+        if (optimize) targetVelocity = targetVelocity.optimize(currentAngle).cosineScale(currentAngle);
+
+        LinearVelocity targetLinearVelocity = MetersPerSecond.of(targetVelocity.velocity);
+
         fieldsTable.recordOutput("Module target state", targetVelocity);
         if (useVoltage) {
-            fieldsTable.recordOutputMeasure("Drive motor target voltage", targetStateVelocity.div(MAX_DRIVE_VELOCITY).times(MAX_VOLTAGE));
-            io.setDriveVoltage(targetStateVelocity.div(MAX_DRIVE_VELOCITY).times(MAX_VOLTAGE));
+            fieldsTable.recordOutputMeasure("Drive motor target voltage", targetLinearVelocity.div(DRIVE_FREE_SPEED).times(MAX_VOLTAGE));
+            io.setDriveVoltage(targetLinearVelocity.div(DRIVE_FREE_SPEED).times(MAX_VOLTAGE));
         } else {
-            fieldsTable.recordOutput("Drive motor target velocity", targetStateVelocity);
-            io.setDriveVelocity(targetStateVelocity);
+            fieldsTable.recordOutput("Drive motor target velocity", targetLinearVelocity);
+            io.setDriveVelocity(targetLinearVelocity);
         }
 
         fieldsTable.recordOutputMeasure("Turn motor target angle", targetVelocity.angle.getMeasure());

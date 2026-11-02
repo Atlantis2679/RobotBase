@@ -1,6 +1,7 @@
 package frc.robot.subsystems.swerve;
 
 
+import static frc.robot.subsystems.swerve.SwerveConstants.Modules.DRIVE_FREE_SPEED;
 import static frc.robot.subsystems.swerve.SwerveConstants.Modules.MAX_DRIVE_VELOCITY;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.DegreesPerSecond;
@@ -48,7 +49,7 @@ public class SwerveCommands {
     }
 
     public Command driveForward(DoubleSupplier forwardPrecentageSupplier) {
-        return swerve.runRepeatedly(() -> swerve.drive(MAX_DRIVE_VELOCITY.times(forwardPrecentageSupplier.getAsDouble()), MetersPerSecond.zero(), DegreesPerSecond.zero(), false, true))
+        return swerve.runRepeatedly(() -> swerve.drive(DRIVE_FREE_SPEED.times(forwardPrecentageSupplier.getAsDouble()), MetersPerSecond.zero(), DegreesPerSecond.zero(), false, true))
             .named("Drive Forward");
     }
 

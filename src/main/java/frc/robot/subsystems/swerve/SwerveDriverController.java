@@ -79,20 +79,24 @@ public class SwerveDriverController implements Command, ComplexTunable {
                 wasFieldRelative = fieldRelative;
             }
 
-            double precentageForward = forwardSupplier.getAsDouble() * linearVelocityMultiplierSelect.getSelected();
-            double precentageSideways = sidewaysSupplier.getAsDouble() * linearVelocityMultiplierSelect.getSelected();
-            double precentageRotation = rotationsSupplier.getAsDouble() * rotationVelocityMultiplierSelect.getSelected();
+            double forward = forwardSupplier.getAsDouble();
+            double sideways = sidewaysSupplier.getAsDouble();
+            double rotationInput = rotationsSupplier.getAsDouble();
 
+            Translation2d stick = new Translation2d(forward, sideways);
+            if (stick.getNorm() > 1) stick = stick.div(stick.getNorm());
+
+            double linearMultiplier = linearVelocityMultiplierSelect.getSelected();
+            double rotationMultiplier = rotationVelocityMultiplierSelect.getSelected();
             if (isSensitiveMode.getAsBoolean()) {
-                precentageForward *= SENSITIVE_TRANSLATION_MULTIPLIER;
-                precentageSideways *= SENSITIVE_TRANSLATION_MULTIPLIER;
-                precentageRotation *= SENSITIVE_ROTATION_MULTIPLIER;
+                linearMultiplier *= SENSITIVE_TRANSLATION_MULTIPLIER;
+                rotationMultiplier *= SENSITIVE_ROTATION_MULTIPLIER;
             }
 
             Translation2d translation = translationSlewRateLimiter.calculate(
-                new Translation2d(precentageForward * MAX_LINEAR_VELOCITY.in(MetersPerSecond), precentageSideways * MAX_LINEAR_VELOCITY.in(MetersPerSecond)));
-            double rotation = rotationSlewRateLimiter.calculate(precentageRotation * MAX_ANGULAR_VELOCITY.in(DegreesPerSecond));
-
+                stick.times(linearMultiplier * MAX_LINEAR_VELOCITY.in(MetersPerSecond)));
+            double rotation = rotationSlewRateLimiter.calculate(
+                rotationInput * rotationMultiplier * MAX_ANGULAR_VELOCITY.in(DegreesPerSecond));
             swerve.drive(
                 MetersPerSecond.of(translation.getX()),
                 MetersPerSecond.of(translation.getY()),
