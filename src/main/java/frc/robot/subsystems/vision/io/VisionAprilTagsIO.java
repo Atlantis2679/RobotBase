@@ -1,9 +1,11 @@
 package frc.robot.subsystems.vision.io;
 
+import java.sql.Time;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.wpilib.math.geometry.Pose3d;
+import org.wpilib.units.measure.Distance;
 
 import frc.robot.subsystems.vision.VisionConstants.CameraConfig;
 import team2679.atlantiskit.logfields.IOBase;
@@ -11,9 +13,9 @@ import team2679.atlantiskit.logfields.LogFieldsTable;
 
 public abstract class VisionAprilTagsIO extends IOBase {
     public record VisionData(
-        double timestampSeconds,
+        Time timestamp,
         Pose3d robotPose,
-        double avgDistanceToCam,
+        Distance avgDistanceToCam,
         double ambiguity,
         int tagsUsed) {}
 

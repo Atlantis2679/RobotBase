@@ -87,10 +87,8 @@ public class PoseEstimator implements ComplexTunable {
     public void addVisionMeasurement(VisionMeasurement measurement) {
         if (measurement.timestamp.lt(lastResetTimestamp)) return;
         try {
-            Time dt = measurement.timestamp.minus(Seconds.of(odometryPosesBuffer.getInternalBuffer().lastKey()));
-            if (dt.gt(ODOMETRY_POSES_BUFFER_SIZE)) {
-                return;
-            }
+            Time lastKey = Seconds.of(odometryPosesBuffer.getInternalBuffer().lastKey());
+            if (lastKey.minus(measurement.timestamp).gt(ODOMETRY_POSES_BUFFER_SIZE)) return;
         } catch (NoSuchElementException ex) {
             return;
         }

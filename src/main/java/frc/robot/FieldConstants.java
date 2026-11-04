@@ -17,9 +17,9 @@ public class FieldConstants {
     public static final Angle PITCH_ROLL_THRESHOLD = Degrees.of(10);
 
     public static boolean isOnField(Pose3d pose) {
-        if (pose.getTranslation().getMeasureZ().isNear(Meters.zero(), HEIGHT_ABOVE_FIELD_THRESHOLD)) return false;
-        if (pose.getRotation().getMeasureX().isNear(Degrees.zero(), PITCH_ROLL_THRESHOLD)) return false;
-        if (pose.getRotation().getMeasureY().isNear(Degrees.zero(), PITCH_ROLL_THRESHOLD)) return false;
+        if (!pose.getTranslation().getMeasureZ().isNear(Meters.zero(), HEIGHT_ABOVE_FIELD_THRESHOLD)) return false;
+        if (!pose.getRotation().getMeasureX().isNear(Degrees.zero(), PITCH_ROLL_THRESHOLD)) return false;
+        if (!pose.getRotation().getMeasureY().isNear(Degrees.zero(), PITCH_ROLL_THRESHOLD)) return false;
         if (pose.getX() < 0 || pose.getY() < 0) return false;
         if (pose.getX() > FIELD.length || pose.getY() > FIELD.width) return false;
         return true;

@@ -1,6 +1,8 @@
 package frc.robot.subsystems.vision.io;
 
 import static frc.robot.FieldConstants.FIELD;
+import static org.wpilib.units.Units.Meters;
+import static org.wpilib.units.Units.Seconds;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +15,9 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 import org.wpilib.math.geometry.Pose3d;
 import org.wpilib.math.geometry.Transform3d;
+import org.wpilib.units.measure.Distance;
+import org.wpilib.units.measure.Time;
+
 import frc.robot.Robot;
 import frc.robot.subsystems.vision.VisionConstants.CameraConfig;
 import frc.robot.subsystems.vision.VisionConstants.Sim;
@@ -25,7 +30,7 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
     private VisionData[] visionData;
     private boolean moreThanOneTargetInSingleTargetMode = false;
 
-    public VisionAprilTagsIOPhoton(LogFieldsTable fieldsTable, CameraConfig cameraConfig) {
+    public VisionAprilTagsIOPhoton(LogFieldsTable fieldsTable, CameraConfig cameraConfig, PeriodicAlertsGroup alertsGroup) {
         super(fieldsTable.getSubTable(cameraConfig.name()));
 
         this.camera = new PhotonCamera(cameraConfig.name());
@@ -35,7 +40,7 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
             Sim.VISION_SIM.addCamera(photonCameraSim, cameraConfig.robotToCam());
         }
 
-        new PeriodicAlertsGroup("Vision").addMediumAlert(() -> "PhotonVision multitag is failed or is disabled", () -> this.moreThanOneTargetInSingleTargetMode);
+        alertsGroup.addMediumAlert(() -> "PhotonVision multitag is failed or is disabled for " + cameraConfig.name() + " camera", () -> this.moreThanOneTargetInSingleTargetMode);
 
         this.cameraConfig = cameraConfig;
     }
@@ -50,21 +55,21 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
             if (result.hasTargets()) {
                 if (result.getMultiTagResult().isPresent()) {
                     moreThanOneTargetInSingleTargetMode = false;
-                    Transform3d cameraToPose = result.multitagResult.get().estimatedPose.best;
-                    Pose3d camPose = new Pose3d().transformBy(cameraToPose);
+                    Transform3d fieldToCam = result.multitagResult.get().estimatedPose.best;
+                    Pose3d camPose = new Pose3d().transformBy(fieldToCam);
                     Pose3d robotPose = camPose.transformBy(cameraConfig.robotToCam().inverse());
-                    double timestamp = result.getTimestampSeconds();
+                    Time timestamp = Seconds.of(result.getTimestampSeconds());
                     Pose3d[] tagsPoses = result.multitagResult.get().fiducialIDsUsed.stream()
                             .map(targetId -> FIELD.getTagPose(targetId))
                             .flatMap(Optional::stream).toList().toArray(new Pose3d[0]);
                     int tagsUsed = tagsPoses.length;
                     if (tagsUsed == 0) continue;
-                    double distanceSum = 0;
+                    Distance distanceSum = Meters.zero();
                     for (Pose3d target : tagsPoses) {
-                      distanceSum += target.relativeTo(camPose).getTranslation().getNorm();
+                      distanceSum.plus(Meters.of(target.relativeTo(camPose).getTranslation().getNorm()));
                     }
                     tagsPosesList.add(tagsPoses);
-                    visionData.add(new VisionData(timestamp, robotPose, distanceSum / tagsUsed, result.multitagResult.get().estimatedPose.ambiguity, tagsUsed));
+                    visionData.add(new VisionData(timestamp, robotPose, distanceSum.div(tagsUsed), result.multitagResult.get().estimatedPose.ambiguity, tagsUsed));
                 } else {
                     moreThanOneTargetInSingleTargetMode = result.getTargets().size() > 1;
                     PhotonTrackedTarget target = null;
@@ -79,8 +84,8 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
                     Transform3d camToTarget = target.bestCameraToTarget;
                     Transform3d robotToTarget = cameraConfig.robotToCam().plus(camToTarget);
                     Pose3d robotPose = tagPose.transformBy(robotToTarget.inverse());
-                    double camToTargetDistance = camToTarget.getTranslation().getNorm();
-                    double timestamp = result.getTimestampSeconds();
+                    Distance camToTargetDistance = Meters.of(camToTarget.getTranslation().getNorm());
+                    Time timestamp = Seconds.of(result.getTimestampSeconds());
                     visionData.add(new VisionData(timestamp, robotPose, camToTargetDistance, target.poseAmbiguity, 1));
                 }
             }

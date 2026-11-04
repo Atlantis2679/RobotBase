@@ -13,11 +13,13 @@ import org.wpilib.tunable.Tunables;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveCommands;
 import frc.robot.subsystems.swerve.SwerveDriverController;
+import frc.robot.subsystems.vision.Vision;
 import frc.robot.utils.NaturalXboxController;
 import frc.robot.utils.TunableCommand;
 
 public class RobotContainer {
     Swerve swerve = new Swerve();
+    Vision Vision = new Vision();
 
     SwerveCommands swerveCommands = new SwerveCommands(swerve);
 

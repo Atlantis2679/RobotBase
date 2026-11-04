@@ -1,8 +1,10 @@
 package frc.robot.subsystems.vision;
 
+import static org.wpilib.units.Units.Meters;
 import static org.wpilib.units.Units.Seconds;
+import static frc.robot.FieldConstants.FIELD;
 import static frc.robot.subsystems.vision.VisionConstants.AMBIGUITY_THRESHOLD;
-import static frc.robot.subsystems.vision.VisionConstants.AVG_DISTANCE_THRESHOLD_METERS;
+import static frc.robot.subsystems.vision.VisionConstants.AVG_DISTANCE_THRESHOLD;
 import static frc.robot.subsystems.vision.VisionConstants.CAMERAS;
 import static frc.robot.subsystems.vision.VisionConstants.PRE_MATCH_TRUST_LEVEL_MULTIPLIER;
 import static frc.robot.subsystems.vision.VisionConstants.TRUST_LEVEL_MULTIPLIER;
@@ -10,13 +12,17 @@ import static frc.robot.subsystems.vision.VisionConstants.TRUST_LEVEL_MULTIPLIER
 import java.util.ArrayList;
 import java.util.List;
 
+import org.photonvision.estimation.TargetModel;
+import org.photonvision.simulation.VisionTargetSim;
 import org.wpilib.command3.Scheduler;
 import org.wpilib.driverstation.RobotState;
+import org.wpilib.fields.FieldTag;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.telemetry.Telemetry;
 import org.wpilib.tunable.ComplexTunable;
 import org.wpilib.tunable.TunableDouble;
 import org.wpilib.tunable.TunableTable;
+import org.wpilib.units.measure.Distance;
 
 import frc.robot.FieldConstants;
 import frc.robot.Robot;
@@ -28,6 +34,7 @@ import frc.robot.subsystems.vision.VisionConstants.CameraConfig;
 import frc.robot.subsystems.vision.VisionConstants.Sim;
 import frc.robot.subsystems.vision.io.VisionAprilTagsIO;
 import frc.robot.subsystems.vision.io.VisionAprilTagsIO.VisionData;
+import frc.robot.utils.TunableMeasure;
 import frc.robot.subsystems.vision.io.VisionAprilTagsIOPhoton;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
@@ -41,16 +48,19 @@ public class Vision implements ComplexTunable {
   private static final TunableTrustLevel trustLevelMultiplier = new TunableTrustLevel(TRUST_LEVEL_MULTIPLIER);
   private static final TunableTrustLevel preMatchTrustLevelMultiplier = new TunableTrustLevel(PRE_MATCH_TRUST_LEVEL_MULTIPLIER);
   private static final TunableDouble ambiguityThreshold = TunableDouble.create(AMBIGUITY_THRESHOLD);
-  private static final TunableDouble distanceThresholdMeters = TunableDouble.create(AVG_DISTANCE_THRESHOLD_METERS);
+  private static final TunableMeasure<Distance> distanceThreshold = new TunableMeasure<Distance>(AVG_DISTANCE_THRESHOLD, Meters);
 
   public Vision() {
     if (Robot.isSimulation()) {
       Telemetry.log("VisionSimulation", Sim.VISION_SIM.getDebugField());
+    for (FieldTag tag : FIELD.getTags())
+        Sim.VISION_SIM.addVisionTargets("apriltag", new VisionTargetSim(
+            FIELD.getTagPose(tag.getID()).get(), TargetModel.kAprilTag36h11, tag.getID()));
     }
-    PeriodicAlertsGroup alertsGroup = new PeriodicAlertsGroup("Vision");
+    PeriodicAlertsGroup alertsGroup = new PeriodicAlertsGroup("Vision Alerts");
     for (int i = 0; i < visionCameras.length; i++) {
       CameraConfig camera = CAMERAS[i];
-      visionCameras[i] = new VisionAprilTagsIOPhoton(fieldsTable, camera);
+      visionCameras[i] = new VisionAprilTagsIOPhoton(fieldsTable, camera, alertsGroup);
       VisionAprilTagsIO io = visionCameras[i];
       alertsGroup.addMediumAlert(() -> camera.name() + " Disconnected!", () -> !io.isConnected.getAsBoolean());
     }
@@ -63,7 +73,7 @@ public class Vision implements ComplexTunable {
     double stdFactor = io.getCameraConfig().stdFactor();
     for (VisionData visionData : visionDataArr) {
       if (!inRange(visionData.ambiguity(), 0, ambiguityThreshold.get())) continue;
-      if (!inRange(visionData.avgDistanceToCam(), 0, distanceThresholdMeters.get())) continue;
+      if (!inRange(visionData.avgDistanceToCam(), 0, distanceThreshold.get())) continue;
       if (!FieldConstants.isOnField(visionData.robotPose())) continue;
       TrustLevel trustLevels = calculateTrustLevel(stdFactor, visionData.tagsUsed(), visionData.avgDistanceToCam(), visionData.ambiguity());
       visionMeasurements.add(new VisionMeasurement(visionData.robotPose().toPose2d(), trustLevels, Seconds.of(visionData.timestampSeconds())));
@@ -74,8 +84,8 @@ public class Vision implements ComplexTunable {
   private List<VisionMeasurement> getAllResults() {
     List<VisionMeasurement> measurements = new ArrayList<>();
     for (VisionAprilTagsIO io : visionCameras) {
-      for (VisionMeasurement measurment : getAllResultsInIO(io)) {
-        measurements.add(measurment);
+      for (VisionMeasurement measurement : getAllResultsInIO(io)) {
+        measurements.add(measurement);
       }
     }
     fieldsTable.recordOutput("Vision measurements", measurements.toArray(new VisionMeasurement[0]));
@@ -86,8 +96,8 @@ public class Vision implements ComplexTunable {
     if (RobotBase.isSimulation()) {
       VisionConstants.Sim.VISION_SIM.update(PoseEstimator.getInstance().getOdometryPose());
     }
-    for (VisionMeasurement mesurement : getAllResults()) {
-      PoseEstimator.getInstance().addVisionMeasurement(mesurement);
+    for (VisionMeasurement measurement : getAllResults()) {
+      PoseEstimator.getInstance().addVisionMeasurement(measurement);
     }
   }
 
@@ -105,8 +115,8 @@ public class Vision implements ComplexTunable {
   @Override
   public void publishTunable(TunableTable table) {
     table.publish("Trust level multiplier", trustLevelMultiplier);
+    table.publish("Distance threshold", distanceThreshold.tunable());
     table.publish("PreMatch trust level multiplier", preMatchTrustLevelMultiplier);
     table.publishDouble("Ambiguity threshold", ambiguityThreshold::get, ambiguityThreshold::set);
-    table.publishDouble("Distance threshold", distanceThresholdMeters::get, distanceThresholdMeters::set);
   }
 }
