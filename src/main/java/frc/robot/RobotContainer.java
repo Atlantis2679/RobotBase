@@ -62,5 +62,6 @@ public class RobotContainer {
 
     public void publishTunables() {
         Tunables.publish("Swerve", swerve);
+        Tunables.publish("Vision", Vision);
     }
 }

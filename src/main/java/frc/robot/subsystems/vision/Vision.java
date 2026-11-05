@@ -109,7 +109,7 @@ public class Vision implements ComplexTunable {
     double value = Math.pow(avgDistanceToCamMeters, 2) / Math.pow(tagsUsed, 2) / Math.pow(1 - ambiguity, 2) * stdFactor;
     TrustLevel result = new TrustLevel(value, value).multiply(trustLevelMultiplier.get());
     boolean robotDisabled = RobotState.isDisabled();
-    if(robotDisabled) result.multiply(preMatchTrustLevelMultiplier.get());
+    if(robotDisabled) result = result.multiply(preMatchTrustLevelMultiplier.get());
 
     double thetaStd;
     if (RobotState.isDisabled()) thetaStd = tagsUsed > 1 ? result.rotationStdDev() : Double.POSITIVE_INFINITY;

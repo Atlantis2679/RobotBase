@@ -171,7 +171,7 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
         turnTorqueCurrent = turnMotor.getTorqueCurrent();
         canCoderAbsolutePosition = canCoder.getAbsolutePosition();
 
-        BaseStatusSignal.setUpdateFrequencyForAll(250.0, drivePosition, driveVelocity, turnPosition);
+        BaseStatusSignal.setUpdateFrequencyForAll(50.0, drivePosition, driveVelocity, turnPosition);
         BaseStatusSignal.setUpdateFrequencyForAll(50.0, driveTorqueCurrent, turnTorqueCurrent);
 
         AlertsFactory.phoenixMotor(PeriodicAlertsGroup.defaultInstance,
