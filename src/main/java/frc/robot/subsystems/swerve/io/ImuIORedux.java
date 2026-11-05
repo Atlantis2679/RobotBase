@@ -4,8 +4,10 @@ package frc.robot.subsystems.swerve.io;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 
 import static frc.robot.RobotMap.CANBUS.CAN_AND_GYRO_ID;
+import static frc.robot.subsystems.swerve.SwerveConstants.GYRO_CONNECTED_DEBOUNCE_TIME;
 import static org.wpilib.units.Units.Gs;
 import static org.wpilib.units.Units.Rotations;
+import static org.wpilib.units.Units.Seconds;
 
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.LinearAcceleration;
@@ -36,7 +38,7 @@ public class ImuIORedux extends ImuIO {
 
     @Override
     protected boolean getIsConnected() {
-        return canandgyro.isConnected();
+        return canandgyro.isConnected(GYRO_CONNECTED_DEBOUNCE_TIME.in(Seconds)) && !canandgyro.isCalibrating();
     }
 
     @Override

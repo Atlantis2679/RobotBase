@@ -77,8 +77,7 @@ public class PoseEstimator implements ComplexTunable {
         fieldsTable.recordOutput("Current Odometry Pose", odometryPose);
         fieldsTable.recordOutput("YawAngluarVelocity", yawRotationalSensorHelper.getVelocity());
         odometryPosesBuffer.addSample(measurement.timestamp.in(Seconds), odometryPose);
-        Twist2d odometryTwistFromLastPose = new Transform2d(lastOdometryPose, odometryPose).log();
-        estimatedPose = estimatedPose.plus(odometryTwistFromLastPose.exp());
+        estimatedPose = estimatedPose.plus(new Transform2d(lastOdometryPose, odometryPose));
         fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
         fieldsTable.recordOutput("Odometry to Estimated Transform (Odometry error)", new Transform2d(odometryPose, estimatedPose));
         callAllCallbacks();

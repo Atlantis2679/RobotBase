@@ -27,7 +27,7 @@ import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
 public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
     private final PhotonCamera camera;
     private final CameraConfig cameraConfig;
-    private VisionData[] visionData;
+    private VisionData[] visionData = new VisionData[0];
     private boolean moreThanOneTargetInSingleTargetMode = false;
 
     public VisionAprilTagsIOPhoton(LogFieldsTable fieldsTable, CameraConfig cameraConfig, PeriodicAlertsGroup alertsGroup) {
@@ -66,7 +66,7 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
                     if (tagsUsed == 0) continue;
                     Distance distanceSum = Meters.zero();
                     for (Pose3d target : tagsPoses) {
-                      distanceSum.plus(Meters.of(target.relativeTo(camPose).getTranslation().getNorm()));
+                        distanceSum = distanceSum.plus(Meters.of(target.relativeTo(camPose).getTranslation().getNorm()));
                     }
                     tagsPosesList.add(tagsPoses);
                     visionData.add(new VisionData(timestamp, robotPose, distanceSum, 0.0, tagsUsed));

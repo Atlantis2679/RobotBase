@@ -53,9 +53,10 @@ public class Vision implements ComplexTunable {
   public Vision() {
     if (Robot.isSimulation()) {
       Telemetry.log("VisionSimulation", Sim.VISION_SIM.getDebugField());
-    for (FieldTag tag : FIELD.getTags())
+      for (FieldTag tag : FIELD.getTags()) {
         Sim.VISION_SIM.addVisionTargets("apriltag", new VisionTargetSim(
-            FIELD.getTagPose(tag.getID()).get(), TargetModel.kAprilTag36h11, tag.getID()));
+          FIELD.getTagPose(tag.getID()).get(), TargetModel.kAprilTag36h11, tag.getID()));
+      }
     }
     PeriodicAlertsGroup alertsGroup = new PeriodicAlertsGroup("Vision Alerts");
     for (int i = 0; i < visionCameras.length; i++) {
@@ -88,6 +89,7 @@ public class Vision implements ComplexTunable {
         measurements.add(measurement);
       }
     }
+    measurements.sort((a, b) -> a.timestamp().compareTo(b.timestamp()));
     fieldsTable.recordOutput("Vision measurements", measurements.toArray(new VisionMeasurement[0]));
     return measurements;
   }
@@ -105,9 +107,9 @@ public class Vision implements ComplexTunable {
     if (ambiguity == 1 || tagsUsed == 0 || avgDistanceToCamMeters == 0)
       return new TrustLevel(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
     double value = Math.pow(avgDistanceToCamMeters, 2) / Math.pow(tagsUsed, 2) / Math.pow(1 - ambiguity, 2) * stdFactor;
-    TrustLevel result = new TrustLevel(value, value);
+    TrustLevel result = new TrustLevel(value, value).multiply(trustLevelMultiplier.get());
     boolean robotDisabled = RobotState.isDisabled();
-    if(robotDisabled) result.multiply(PRE_MATCH_TRUST_LEVEL_MULTIPLIER);
+    if(robotDisabled) result.multiply(preMatchTrustLevelMultiplier.get());
 
     double thetaStd;
     if (RobotState.isDisabled()) thetaStd = tagsUsed > 1 ? result.rotationStdDev() : Double.POSITIVE_INFINITY;
