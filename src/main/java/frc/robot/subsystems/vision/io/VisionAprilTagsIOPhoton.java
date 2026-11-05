@@ -69,7 +69,7 @@ public class VisionAprilTagsIOPhoton extends VisionAprilTagsIO {
                       distanceSum.plus(Meters.of(target.relativeTo(camPose).getTranslation().getNorm()));
                     }
                     tagsPosesList.add(tagsPoses);
-                    visionData.add(new VisionData(timestamp, robotPose, distanceSum.div(tagsUsed), result.multitagResult.get().estimatedPose.ambiguity, tagsUsed));
+                    visionData.add(new VisionData(timestamp, robotPose, distanceSum, 0.0, tagsUsed));
                 } else {
                     moreThanOneTargetInSingleTargetMode = result.getTargets().size() > 1;
                     PhotonTrackedTarget target = null;

@@ -2,7 +2,6 @@ package frc.robot.subsystems.swerve;
 
 
 import static frc.robot.subsystems.swerve.SwerveConstants.Modules.DRIVE_FREE_SPEED;
-import static frc.robot.subsystems.swerve.SwerveConstants.Modules.MAX_DRIVE_VELOCITY;
 import static org.wpilib.units.Units.Amps;
 import static org.wpilib.units.Units.DegreesPerSecond;
 import static org.wpilib.units.Units.MetersPerSecond;

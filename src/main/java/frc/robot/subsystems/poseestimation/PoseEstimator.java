@@ -179,6 +179,8 @@ public class PoseEstimator implements ComplexTunable {
         return odometryPose;
     }
 
+    public boolean hasGyroAngle() { return lastGyroAngle.isPresent(); }
+
     @Override
     public void publishTunable(TunableTable table) {
         table.publish("Odometry trust level", this.odometryTrustLevel);
