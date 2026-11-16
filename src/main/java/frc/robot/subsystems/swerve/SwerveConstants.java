@@ -93,16 +93,16 @@ public final class SwerveConstants {
         public static final Distance WHEEL_CIRCUMFERENCE = WHEEL_RADIUS.times(2 * Math.PI);
 
         public static final LinearVelocity DRIVE_FREE_SPEED = MetersPerSecond.of(RotationsPerMinute.of(5784).div(DRIVE_GEAR_RATIO).in(RotationsPerSecond) * WHEEL_CIRCUMFERENCE.in(Meters));
-        public static final LinearVelocity MAX_DRIVE_VELOCITY = MetersPerSecond.of(5);
+        public static final LinearVelocity MAX_DRIVE_VELOCITY = MetersPerSecond.of(4.2);
 
         public static final Angle[] OFFSETS = {
-            Degrees.of(26.015625 + 90),
-            Degrees.of(-179.47265625 + 90),
-            Degrees.of(-41.8359375 + 90),
-            Degrees.of(-117.24609375 + 270),
+            Degrees.of(0),
+            Degrees.of(0),
+            Degrees.of(0),
+            Degrees.of(0),
         };
 
-        public static final Current DRIVE_STATOR_CURRENT_LIMIT = Amps.of(60);
+        public static final Current DRIVE_STATOR_CURRENT_LIMIT = Amps.of(90);
 
         public static final Current DRIVE_SUPPLY_CURRENT_LIMIT = Amps.of(60);
         public static final Current DRIVE_SUPPLY_CURRENT_LOWER_LIMIT = Amps.of(30);

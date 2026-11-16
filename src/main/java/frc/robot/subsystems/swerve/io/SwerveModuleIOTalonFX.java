@@ -54,6 +54,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import frc.robot.RobotMap.CANBUS.ModuleCanAddresses;
 import frc.robot.utils.AlertsFactory;
+import frc.robot.utils.PhoenixUtils;
 import team2679.atlantiskit.logfields.LogFieldsTable;
 import team2679.atlantiskit.periodicalerts.PeriodicAlertsGroup;
 
@@ -140,18 +141,10 @@ public class SwerveModuleIOTalonFX extends SwerveModuleIO {
 
         canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
 
-        for (int i = 0; i < 5; i++) {
-            driveMotorStatus = driveMotor.getConfigurator().apply(driveMotorConfig);
-            if (driveMotorStatus.isOK()) break;
-        }
-        for (int i = 0; i < 5; i++) {
-            turnMotorStatus = turnMotor.getConfigurator().apply(turnMotorConfig);
-            if (turnMotorStatus.isOK()) break;
-        }
-        for (int i = 0; i < 5; i++) {
-            canCoderStatus = canCoder.getConfigurator().apply(canCoderConfig);
-            if (canCoderStatus.isOK()) break;
-        }
+
+        PhoenixUtils.tryUntilOk(5, () -> driveMotor.getConfigurator().apply(driveMotorConfig));
+        PhoenixUtils.tryUntilOk(5, () -> turnMotor.getConfigurator().apply(turnMotorConfig));
+        PhoenixUtils.tryUntilOk(5, () -> canCoder.getConfigurator().apply(canCoderConfig));
         
         driveMotor.setPosition(0);
 

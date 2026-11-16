@@ -100,6 +100,7 @@ public class PoseEstimator implements ComplexTunable {
         estimatedPose = estimateAtTime.plus(visionTransform).plus(odometryToSampleTransform.inverse());
         fieldsTable.recordOutput("Current Estimated Pose", estimatedPose);
         fieldsTable.recordOutput("Odometry to Estimated Transform (Odometry error)", new Transform2d(odometryPose, estimatedPose));
+        fieldsTable.recordOutput("Odometry error (field frame)", estimatedPose.getTranslation().minus(odometryPose.getTranslation()));
         callAllCallbacks();
     }
 

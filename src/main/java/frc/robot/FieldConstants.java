@@ -13,7 +13,7 @@ import org.wpilib.units.measure.Distance;
 public class FieldConstants {
     public static final Field FIELD = Field.loadField(Fields.FRC_2026_REBUILT_WELDED);
 
-    public static final Distance HEIGHT_ABOVE_FIELD_THRESHOLD = Centimeters.of(5);
+    public static final Distance HEIGHT_ABOVE_FIELD_THRESHOLD = Centimeters.of(15);
     public static final Angle PITCH_ROLL_THRESHOLD = Degrees.of(10);
 
     public static boolean isOnField(Pose3d pose) {
