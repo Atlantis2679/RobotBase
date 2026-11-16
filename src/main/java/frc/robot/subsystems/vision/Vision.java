@@ -112,7 +112,7 @@ public class Vision implements ComplexTunable {
     if(robotDisabled) result = result.multiply(preMatchTrustLevelMultiplier.get());
 
     double thetaStd;
-    if (RobotState.isDisabled()) thetaStd = tagsUsed > 1 ? result.rotationStdDev() : Double.POSITIVE_INFINITY;
+    if (robotDisabled) thetaStd = tagsUsed > 1 ? result.rotationStdDev() : Double.POSITIVE_INFINITY;
     else if (PoseEstimator.getInstance().hasGyroAngle()) thetaStd = Double.POSITIVE_INFINITY;
     else thetaStd = result.rotationStdDev();
     return new TrustLevel(result.xyStdDev(), thetaStd);  }

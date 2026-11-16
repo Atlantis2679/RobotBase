@@ -10,6 +10,7 @@ import org.wpilib.driverstation.Alliance;
 import org.wpilib.driverstation.MatchState;
 import org.wpilib.tunable.Tunables;
 
+import frc.robot.subsystems.poseestimation.PoseEstimator;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveCommands;
 import frc.robot.subsystems.swerve.SwerveDriverController;
@@ -63,5 +64,6 @@ public class RobotContainer {
     public void publishTunables() {
         Tunables.publish("Swerve", swerve);
         Tunables.publish("Vision", Vision);
+        Tunables.publish("PoseEstimator", PoseEstimator.getInstance());
     }
 }
